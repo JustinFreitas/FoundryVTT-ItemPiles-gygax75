@@ -95,12 +95,24 @@ export default class Transaction {
 							foundry.utils.setProperty(existingItemUpdate, CONSTANTS.FLAGS.ITEM + ".notForSale", newQuantity === 0);
 						}
 					} else {
-						const update = Utilities.setItemQuantity(documentExistingItem.toObject(), newQuantity);
-						if (keepIfZero && type !== "currency") {
-							foundry.utils.setProperty(update, CONSTANTS.FLAGS.ITEM + ".notForSale", newQuantity === 0);
-						}
-						this.itemTypeMap.set(documentExistingItem.id, type)
-						this.itemsToUpdate.push(update);
+                        // HACK for Gygax75 - Always create new item instead of incrementing existing.
+                        if (remove) {
+                            const update = Utilities.setItemQuantity(documentExistingItem.toObject(), newQuantity);
+                            if (keepIfZero && type !== "currency") {
+                                foundry.utils.setProperty(update, CONSTANTS.FLAGS.ITEM + ".notForSale", newQuantity === 0);
+                            }
+                            this.itemTypeMap.set(documentExistingItem.id, type)
+                            this.itemsToUpdate.push(update);
+                        } else {
+                            if (!itemData._id) {
+                                itemData._id = foundry.utils.randomID();
+                                itemData.name = documentExistingItem.name;
+                                itemData.type = documentExistingItem.type;
+                            }
+                            Utilities.setItemQuantity(itemData, incomingQuantity);
+                            this.itemsToCreate.push(itemData);
+                            this.itemTypeMap.set(itemData._id, type)
+                        }    
 					}
 
 					this.itemDeltas.set(documentExistingItem.id, (this.itemDeltas.has(documentExistingItem.id) ? this.itemDeltas.get(documentExistingItem.id) : 0) + incomingQuantity);
