@@ -29,6 +29,7 @@ export default class Transaction {
 		set = false, remove = false, type = "item", keepIfZero = false
 	} = {}) {
 
+        const actorIsItemPile = PileUtilities.isValidItemPile(this.document);
 		for (let data of items) {
 
 			let item = data.item ?? data;
@@ -96,7 +97,7 @@ export default class Transaction {
 						}
 					} else {
                         // HACK for Gygax75 - Always create new item instead of incrementing existing.
-                        if (remove) {
+                        if (remove || actorIsItemPile) {
                             const update = Utilities.setItemQuantity(documentExistingItem.toObject(), newQuantity);
                             if (keepIfZero && type !== "currency") {
                                 foundry.utils.setProperty(update, CONSTANTS.FLAGS.ITEM + ".notForSale", newQuantity === 0);
