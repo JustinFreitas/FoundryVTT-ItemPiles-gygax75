@@ -2,7 +2,7 @@
   "id": "item-piles",
   "title": "Item Piles",
   "description": "This module adds the ability for items to be dropped onto the ground, and then picked up.",
-  "version": "3.1.6_2-gygax75",
+  "version": "3.1.6_3-gygax75",
   "library": "false",
   "compatibility": {
     "minimum": "11",

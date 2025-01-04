@@ -102,7 +102,7 @@ export default class Transaction {
                             if (keepIfZero && type !== "currency") {
                                 foundry.utils.setProperty(update, CONSTANTS.FLAGS.ITEM + ".notForSale", newQuantity === 0);
                             }
-                            this.itemTypeMap.set(documentExistingItem.id, type)
+                            this.itemTypeMap.set(documentExistingItem.id, type);
                             this.itemsToUpdate.push(update);
                         } else {
                             if (!itemData._id) {
@@ -110,9 +110,10 @@ export default class Transaction {
                                 itemData.name = documentExistingItem.name;
                                 itemData.type = documentExistingItem.type;
                             }
+                            itemData.system.containerId = "";
                             Utilities.setItemQuantity(itemData, incomingQuantity);
                             this.itemsToCreate.push(itemData);
-                            this.itemTypeMap.set(itemData._id, type)
+                            this.itemTypeMap.set(itemData._id, type);
                         }    
 					}
 
@@ -129,8 +130,9 @@ export default class Transaction {
 						itemData._id = foundry.utils.randomID();
 					}
 					Utilities.setItemQuantity(itemData, incomingQuantity);
+                    itemData.system.containerId = "";
 					this.itemsToCreate.push(itemData);
-					this.itemTypeMap.set(itemData._id, type)
+					this.itemTypeMap.set(itemData._id, type);
 
 				}
 
@@ -144,8 +146,9 @@ export default class Transaction {
 						itemData._id = foundry.utils.randomID();
 					}
 					Utilities.setItemQuantity(itemData, incomingQuantity);
+                    itemData.system.containerId = "";
 					this.itemsToCreate.push(itemData);
-					this.itemTypeMap.set(itemData._id, type)
+					this.itemTypeMap.set(itemData._id, type);
 				}
 			}
 		}
@@ -162,16 +165,16 @@ export default class Transaction {
 			acc[attribute.path] = acc[attribute.path] ?? Number(foundry.utils.getProperty(this.document, attribute.path) ?? 0);
 			if (set) {
 				if (!onlyDelta) {
-					acc[attribute.path] = incomingQuantity
+					acc[attribute.path] = incomingQuantity;
 				}
 				this.attributeDeltas.set(attribute.path, (this.attributeDeltas.has(attribute.path) ? this.attributeDeltas.get(attribute.path) : acc[attribute.path]) + incomingQuantity);
 			} else {
 				if (!onlyDelta) {
-					acc[attribute.path] += incomingQuantity
+					acc[attribute.path] += incomingQuantity;
 				}
 				this.attributeDeltas.set(attribute.path, (this.attributeDeltas.has(attribute.path) ? this.attributeDeltas.get(attribute.path) : 0) + incomingQuantity);
 			}
-			this.attributeTypeMap.set(attribute.path, type)
+			this.attributeTypeMap.set(attribute.path, type);
 			return acc;
 		}, this.documentChanges);
 	}
