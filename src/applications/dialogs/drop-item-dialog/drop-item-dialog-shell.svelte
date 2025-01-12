@@ -15,9 +15,9 @@
 	const unlimitedQuantity = application.options?.unlimitedQuantity ?? false;
 
 	let form;
-	let quantity = 1;
 
 	const itemQuantity = Utilities.getItemQuantity(item);
+	let quantity = itemQuantity > 0 ? itemQuantity : 1;
 	const sliderQuantity = itemQuantity + (application.options?.quantityAdjustment ?? 0);
 	const canItemStack = PileUtilities.canItemStack(item, target);
 
