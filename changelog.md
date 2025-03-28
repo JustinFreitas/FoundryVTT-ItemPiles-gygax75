@@ -1,5 +1,33 @@
 # Item Piles Changelog
 
+## Version 3.2.4
+
+- Fixed text based rollable tables populated with text-based UUIDs not being compatible with item piles' rollable table integrations - this makes Item Piles compatible with D&D5e's Dungeon Master's Guide rollable tables
+- Fixed right-click menu not working on vault items
+
+## Version 3.2.3
+
+- Fixed merchants with non-infinite currencies not rendering
+
+## Version 3.2.2
+
+- ACTUALLY fixed players not being able to preview some items on merchants if the items were utilizing AppV2 interfaces (thanks kgar for the tip!)
+- Fixed merchant interface not working for some users
+- Added multiple new hooks relating to rendering of items in piles, merchants, and vaults - see API for more info:
+  - `item-piles-renderPileItem`
+  - `item-piles-mouseHoverPileItem`
+  - `item-piles-mouseLeavePileItem`
+  - `item-piles-renderMerchantItem`
+  - `item-piles-mouseHoverMerchantItem`
+  - `item-piles-mouseLeaveMerchantItem`
+  - `item-piles-renderVaultGridItem`
+  - `item-piles-mouseHoverVaultGridItem`
+  - `item-piles-mouseLeaveVaultGridItem`
+
+## Version 3.2.1
+
+- Fixed deployment of module
+
 ## Version 3.2.0
 
 - Updated minimum version of Foundry for Item Piles to v12
