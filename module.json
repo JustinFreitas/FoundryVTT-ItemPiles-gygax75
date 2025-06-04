@@ -121,7 +121,6 @@
   },
   "socket": true,
   "url": "https://github.com/fantasycalendar/FoundryVTT-ItemPiles",
-  "manifest": "https://github.com/fantasycalendar/FoundryVTT-ItemPiles/releases/latest/download/manifest.json",
   "download": "https://github.com/fantasycalendar/FoundryVTT-ItemPiles/releases/latest/download/module.zip",
   "readme": "https://github.com/fantasycalendar/FoundryVTT-ItemPiles/blob/master/README.md",
   "bugs": "https://github.com/fantasycalendar/FoundryVTT-ItemPiles/issues"
