@@ -8,6 +8,9 @@
       "RequestTrade": "Solicitar Negociação",
       "GiveToCharacter": "Dar ao Personagem"
     },
+    "Hints": {
+      "CtrlClear": "Control + clique para limpar"
+    },
     "PlayerList": {
       "TradeButton": "Trocar"
     },
@@ -22,7 +25,7 @@
       "vault": "Cofre"
     },
     "Notifications": {
-      "SystemSupportFound": "Suporte do sistema encontrado! Aplicando configurações padrão do sistema ao Item Piles...",
+      "SystemSupportFound": "Suporte ao sistema encontrado! Aplicando configurações padrão do sistema ao Item Piles",
       "UpdateItemPileSuccess": "Pilha de Itens atualizada com sucesso.",
       "UpdateMerchantSuccess": "Comerciante atualizado com sucesso.",
       "ItemTransferred": "{item_name} de {source_actor_name} foi dado para {target_actor_name}.",
@@ -156,6 +159,7 @@
       "Minutes": "Minutos",
       "MerchantClosed": "O comerciante está fechado, volte mais tarde.",
       "Sell": "Vender",
+      "SortBy": "Ordenar por:",
       "Description": "Descrição",
       "Settings": "Configurações",
       "Override": "Sobrepor",
@@ -197,8 +201,7 @@
       "LogSetNotForSale": "{instigator} definiu o <strong>{item}</strong> <span>não disponível para venda</span",
       "LogSetVisible": "{instigator} definiu o <strong>{item}</strong> como <span>visível</span",
       "LogSetHidden": "{instigator} definiu o <strong>{item}</strong> como <span>oculto</span",
-      "LogTransaction": "{instigator} {action} {quantity}{item} por {price}",
-      "SortBy": "Ordenar por:"
+      "LogTransaction": "{instigator} {action} {quantity}{item} por {price}"
     },
     "Vault": {
       "VaultTab": "Cofre",
@@ -248,7 +251,7 @@
       },
       "NoSystemFound": {
         "Title": "Sistema Não Reconhecido",
-        "Content": "Atualmente, este sistema não é totalmente suportado. Isso significa que o módulo não sabe como lidar melhor com os itens deste sistema, mas ainda pode operar de forma limitada.<br><br>Você mesmo pode definir as configurações do módulo, mas isso requer um pouco de conhecimento técnico. <br><br>Se você tiver alguma dúvida, é só pingar o <strong>Wasp#2005</strong> no discord do Foundry."
+        "Content": "<strong>Este sistema não é suportado.</strong><br><br>Isso significa que o módulo não sabe como melhor lidar com os itens deste sistema, mas ainda pode operar de forma limitada.<br><br>Você mesmo pode definir as configurações do módulo, mas isso requer um pouco de conhecimento técnico. <br><br>Se você tiver alguma dúvida, tire um print da cixa de diálogo que irá abrir após você fechar isto e peça por ajuda no canal do seu sistema no servidor do discord do Foundry."
       },
       "NewSystemVersion": {
         "Title": "Nova Versão do Sistema",
@@ -361,7 +364,7 @@
         "Title": "Editando Moedas",
         "Content": "Como MJ, você pode atualizar as moedas nesta pilha de itens:",
         "Secondary": "Moedas Secundárias:",
-        "NoCurrency": "{actor_name} não tem moedas válidas.",
+        "NoCurrency": "{actor_name} não tem moedas válidas",
         "Submit": "Enviar"
       },
       "DropCurrencies": {
@@ -571,7 +574,7 @@
       "ItemPileConfig": {
         "Title": "Configurações da Pilha de Itens: {actor_name}",
         "Configure": "Pilha de Item",
-        "Update": "Atualizar",
+        "Update": "Atualizar Config.",
         "Main": {
           "Title": "Configurações Principais",
           "EnabledPile": "Habilitado",
@@ -953,6 +956,9 @@
         "Hint": "Título da pasta para filtrar tabelas de rolagem da aba \"Itens Populares\" no comerciante.",
         "AllTables": "Todas as Tabelas"
       }
+    },
+    "Hints": {
+      "CtrlClear": "Control + Clique para limpar"
     }
   }
 }
