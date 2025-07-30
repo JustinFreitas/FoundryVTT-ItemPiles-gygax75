@@ -1,5 +1,35 @@
 # Item Piles Changelog
 
+## Version 3.2.18
+
+- Updated French localization (thanks rectulo!)
+- Fixed a minor issue with merchants not having the correct secondary price
+
+## Version 3.2.17
+
+- Fixed merchants throwing errors if an item had a price and no overhead cost
+- Added a quiet warning if updating settings after setting currencies to use items from a locked compendium instead of throwing error
+- Updated Portuguese (Brazil), French, and Polish localization (Thank you, Kharmans, rectulo, and lioheart, you people are legends!)
+- Tweaked documentation
+
+## Version 3.2.16
+
+- Added overhead cost to merchants & items - this adds a flat cost on every item sold from the merchant
+- Added buttons for exporting merchant logs to the merchant interface & settings
+- Updated Italian, Portuguese (Brazil), and French localization (thank you GregoryWarn, and rectulo on Weblate!)
+- Tweaked some English localization
+- Tweaked the item similarities setting to have the values `name` and `type` by default
+- Tweaked the item filters setting to have suggestions when configuring it
+- Tweaked item quantity property and item price property settings to have suggestions when configuring them
+- Tweaked merchants to allow owners (not just GMs) to open and close the merchants
+- Fixed switching item pile type on actors would cause the default actor sheet to render in addition to item piles' sheet
+- Fixed GMs selecting a token then shift double-clicking on an item pile not impersonating the token actor in the item pile's interface
+
+## Version 3.2.15
+
+- Fixed `SHEET_OVERRIDES` not being called due to being called before system configuration modules had a chance to register to Item Piles
+- Fixed "Request Trade" button not having the right styling - fixes the interaction between the "Rest Recovery 5e" module and Item Piles
+
 ## Version 3.2.14
 
 - Added `ITEM_TYPE_HANDLERS` to `game.itempiles.API.addSystemIntegration`, whose absence broke item container behavior

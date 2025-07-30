@@ -5,9 +5,9 @@ import * as Helpers from "./helpers/helpers.js";
 import { hotkeyActionState } from "./hotkeys.js";
 import { SYSTEMS } from "./systems.js";
 
-export default function registerLibwrappers() {
+export function registerLibwrappers() {
 
-	libWrapper.register(CONSTANTS.MODULE_NAME, 'Token.prototype._onClickLeft2', function (wrapped, ...args) {
+	libWrapper.register(CONSTANTS.MODULE_NAME, "CONFIG.Token.objectClass.prototype._onClickLeft2", function (wrapped, ...args) {
 		if (PileUtilities.isValidItemPile(this.document) && hotkeyActionState.openPileInventory) {
 			return PrivateAPI._itemPileClicked(this.document);
 		}
@@ -45,7 +45,7 @@ export default function registerLibwrappers() {
 
 	libWrapper.register(CONSTANTS.MODULE_NAME, actorSheetOverride, function (wrapped, forced, options, ...args) {
 		const renderItemPileInterface = Hooks.call(CONSTANTS.HOOKS.PRE_RENDER_SHEET, this.document, forced, options) === false;
-		if (this._state > Application.RENDER_STATES.NONE) {
+		if (this.state > Application.RENDER_STATES.NONE) {
 			if (renderItemPileInterface) {
 				wrapped(forced, options, ...args)
 			} else {
@@ -74,10 +74,12 @@ export default function registerLibwrappers() {
 			}
 		}
 		return result;
-	}, "WRAPPER")
+	}, "WRAPPER");
 
+}
+
+export function registerSystemLibwrappers() {
 	if (SYSTEMS.DATA.SHEET_OVERRIDES) {
 		SYSTEMS.DATA.SHEET_OVERRIDES();
 	}
-
 }
