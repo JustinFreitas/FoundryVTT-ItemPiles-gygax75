@@ -5,12 +5,11 @@
   * [Installation](README.md#installation)
   * [Required Modules](README.md#required-modules)
   * [Optional Modules](README.md#optional-modules)
-  * [Requesting Support For System](README.md#requesting-support-for-system)
-  * [Natively Supported Systems](README.md#natively-supported-systems)
-  * [Semi-Supported Systems](README.md#semi-supported-systems)
   * [Issues](README.md#issues)
   * [License](README.md#license)
   * [Credits](README.md#credits)
+
+* [Configuring item piles for systems](configuring-item-piles.md)
 
 * [Common User Issues](common-issues.md)
 

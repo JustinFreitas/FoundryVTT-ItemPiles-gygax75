@@ -2,7 +2,7 @@ import "./styles/styles.scss";
 
 import CONSTANTS from "./constants/constants.js";
 import registerUIOverrides from "./foundry-ui-overrides.js";
-import registerLibwrappers from "./libwrapper.js";
+import { registerLibwrappers, registerSystemLibwrappers } from "./libwrapper.js";
 import { applySystemSpecificStyles, checkSystem, patchCurrencySettings, registerSettings } from "./settings.js";
 import { registerHotkeysPost, registerHotkeysPre } from "./hotkeys.js";
 import Socket from "./socket.js";
@@ -24,16 +24,18 @@ import Transaction from "./helpers/transaction.js";
 import { SvelteApplication } from "#runtime/svelte/application";
 import { TJSPosition } from "#runtime/svelte/store/position";
 
-Hooks.once("init", async () => {
-
+Hooks.once('libWrapper.Ready', () => {
 	CONSTANTS.IS_V13 = foundry.utils.isNewerVersion(game.version, 13);
 	Object.freeze(CONSTANTS);
+	registerLibwrappers();
+})
+
+Hooks.once("init", async () => {
 
 	//CONFIG.debug.hooks = true;
 	registerSettings();
 	registerHotkeysPre();
 	registerUIOverrides();
-	registerLibwrappers();
 	setupCaches();
 	setupPlugins("init");
 
@@ -119,6 +121,8 @@ Hooks.once("ready", () => {
 		ChatAPI.disablePastTradingButtons();
 
 		Hooks.callAll(CONSTANTS.HOOKS.READY);
+
+		registerSystemLibwrappers();
 
 		displayChatMessage();
 
