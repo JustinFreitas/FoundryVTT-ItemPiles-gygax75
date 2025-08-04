@@ -2,7 +2,7 @@
   "id": "item-piles",
   "title": "Item Piles",
   "description": "This module adds the ability for items to be dropped onto the ground, and then picked up.",
-  "version": "3.2.6_1-gygax75",
+  "version": "100.0.0",
   "library": "false",
   "compatibility": {
     "minimum": "12",
@@ -14,6 +14,10 @@
       "name": "Wasp",
       "url": "https://github.com/Haxxer",
       "discord": "Wasp#2005"
+    },
+    {
+      "name": "Justin Freitas",
+      "url": "https://github.com/JustinFreitas"
     }
   ],
   "esmodules": [
@@ -97,9 +101,9 @@
     ]
   },
   "socket": true,
-  "url": "https://github.com/fantasycalendar/FoundryVTT-ItemPiles",
-  "manifest": "https://github.com/fantasycalendar/FoundryVTT-ItemPiles/releases/latest/download/manifest.json",
-  "download": "https://github.com/fantasycalendar/FoundryVTT-ItemPiles/releases/latest/download/module.zip",
-  "readme": "https://github.com/fantasycalendar/FoundryVTT-ItemPiles/blob/master/README.md",
-  "bugs": "https://github.com/fantasycalendar/FoundryVTT-ItemPiles/issues"
+  "url": "https://github.com/JustinFreitas/FoundryVTT-ItemPiles-gygax75",
+  "manifest": "https://github.com/JustinFreitas/FoundryVTT-ItemPiles-gygax75/releases/latest/download/manifest.json",
+  "download": "https://github.com/JustinFreitas/FoundryVTT-ItemPiles-gygax75/releases/latest/download/module.zip",
+  "readme": "https://github.com/JustinFreitas/FoundryVTT-ItemPiles-gygax75/blob/master/README.md",
+  "bugs": "https://github.com/JustinFreitas/FoundryVTT-ItemPiles-gygax75/issues"
 }
