@@ -1,5 +1,16 @@
 # Item Piles Changelog
 
+## Version 3.2.20
+
+- Fixed issue with libwrapper error due to some systems reusing the same sheet classes for different actor types
+
+## Version 3.2.19
+
+- Added the ability to configure the rotate vault item hotkey
+- Updated Italian localization (thank you GregoryWarn on Weblate!)
+- Fixed some Item Piles sheets still not opening properly in some systems
+- Fixed item config interface not being able to be opened in some systems
+
 ## Version 3.2.18
 
 - Updated French localization (thanks rectulo!)

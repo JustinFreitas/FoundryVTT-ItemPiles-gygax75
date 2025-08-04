@@ -15,21 +15,24 @@ export function registerLibwrappers() {
 	}, "MIXED");
 
 	const overrideMethod = CONSTANTS.IS_V13
-		? `foundry.applications.sidebar.DocumentDirectory.prototype._onClickEntryName`
+		? `foundry.applications.sidebar.DocumentDirectory.prototype._onClickEntry`
 		: `DocumentDirectory.prototype._onClickEntryName`;
 
-	libWrapper.register(CONSTANTS.MODULE_NAME, overrideMethod, function (wrapped, event) {
+	libWrapper.register(CONSTANTS.MODULE_NAME, overrideMethod, function (wrapped, ...args) {
+		const event = args[0];
 		event.preventDefault();
-		const element = event.currentTarget;
 		if (!(this instanceof Compendium)) {
-			const documentId = element.parentElement.dataset.documentId;
-			const document = this.constructor.collection.get(documentId);
+			const documentId = event.currentTarget?.parentElement?.dataset?.documentId
+				?? event.target?.parentElement?.dataset?.documentId
+				?? event.target?.parentElement?.dataset?.entryId;
+			const collection = this?.constructor?.collection ?? this.collection;
+			const document = collection.get(documentId);
 			if (PileUtilities.isValidItemPile(document)) {
 				const hookResult = Helpers.hooks.call(CONSTANTS.HOOKS.PILE.PRE_DIRECTORY_CLICK, document);
 				if (hookResult === false) return false;
 			}
 		}
-		return wrapped(event);
+		return wrapped(...args);
 	}, "MIXED");
 
 	Hooks.on(CONSTANTS.HOOKS.PRE_RENDER_SHEET, (doc, forced, options) => {
@@ -37,13 +40,20 @@ export function registerLibwrappers() {
 		if (!renderItemPileInterface) return;
 		game.itempiles.API.renderItemPileInterface(doc, { useDefaultCharacter: true });
 		return false;
-	})
+	});
 
-	const actorSheetOverride = CONSTANTS.IS_V13
-		? `foundry.applications.sheets.ActorSheet.prototype.render`
-		: `ActorSheet.prototype.render`
+	const sheetOverrides = Object.keys(CONFIG.Actor.sheetClasses).reduce((acc, str) => {
+		const sheets = Object.keys(CONFIG.Actor.sheetClasses[str]);
+		return acc.concat(
+			sheets.filter(sheet => {
+				return !acc.some(override => override.includes(`["${sheet}"]`));
+			}).map(sheet => {
+				return `CONFIG.Actor.sheetClasses.${str}.["${sheet}"].cls.prototype.render`;
+			})
+		)
+	}, []).flat();
 
-	libWrapper.register(CONSTANTS.MODULE_NAME, actorSheetOverride, function (wrapped, forced, options, ...args) {
+	const sheetOverrideMethod = function (wrapped, forced, options, ...args) {
 		const renderItemPileInterface = Hooks.call(CONSTANTS.HOOKS.PRE_RENDER_SHEET, this.document, forced, options) === false;
 		if (this.state > Application.RENDER_STATES.NONE) {
 			if (renderItemPileInterface) {
@@ -54,7 +64,15 @@ export function registerLibwrappers() {
 		}
 		if (renderItemPileInterface) return;
 		return wrapped(forced, options, ...args);
-	}, "MIXED");
+	};
+
+	for (const override of sheetOverrides) {
+		try {
+			libWrapper.register(CONSTANTS.MODULE_NAME, override, sheetOverrideMethod, "MIXED");
+		} catch (err) {
+			Helpers.custom_warning(`Could not override "${override}" due to error:\n${err}`)
+		}
+	}
 
 	const dragDrop = CONSTANTS.IS_V13
 		? "foundry.applications.ux.DragDrop.implementation"
