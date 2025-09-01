@@ -313,9 +313,11 @@ export function getActorCurrencies(target, {
 	cachedActorCurrencies.set(actorUuid, currencies);
 
 	currencies = currencies.map(currency => {
-		currency.quantity = currency.type === "attribute"
-			? Utilities.sanitizeNumber(foundry.utils.getProperty(actor, currency.path))
-			: Utilities.getItemQuantity(currency.item);
+		if (currency.item) {
+			currency.quantity = currency.type === "attribute"
+				? Utilities.sanitizeNumber(foundry.utils.getProperty(actor, currency.path))
+				: Utilities.getItemQuantity(currency.item);
+		}
 		return currency;
 	});
 
@@ -909,17 +911,37 @@ export function getMerchantModifiersForActor(merchant, {
 }
 
 function getSmallestExchangeRate(currencies) {
-	return currencies.filter(currency => !currency.secondary).length > 1
-		? Math.min(...currencies.filter(currency => !currency.secondary).map(currency => currency.exchangeRate))
+	const primaryCurrencies = currencies.filter(currency => !currency.secondary);
+	const smallestPrimaryCurrencyExchangeRate = Math.min(...primaryCurrencies.map(currency => currency.exchangeRate));
+	return primaryCurrencies.length > 1 && smallestPrimaryCurrencyExchangeRate < 1
+		? smallestPrimaryCurrencyExchangeRate
 		: (Helpers.getSetting(SETTINGS.CURRENCY_DECIMAL_DIGITS) ?? 0.00001);
 }
 
 function getDecimalDifferenceBetweenExchangeRates(currencies) {
-	const smallest = Math.min(...currencies.filter(currency => !currency.secondary).map(curr => curr.exchangeRate));
+
+	const primaryCurrencies = currencies.filter(currency => !currency.secondary);
+
+	const decimals = Helpers.getSetting(SETTINGS.CURRENCY_DECIMAL_DIGITS) ?? 0.00001;
+	const defaultDecimals = decimals.toString().split(".")[1].length;
+
+	if (primaryCurrencies.length === 1) {
+		return defaultDecimals;
+	}
+
+	const exchangeRates = primaryCurrencies.map(curr => curr.exchangeRate);
+
+	const uniqueExchangeRates = new Set(exchangeRates);
+	if (uniqueExchangeRates.length === primaryCurrencies.length) {
+		return defaultDecimals;
+	}
+
+	const smallest = Math.min(...exchangeRates);
 	if (smallest >= 1) {
 		return 0;
 	}
-	const largest = Math.max(...currencies.filter(currency => !currency.secondary).map(curr => curr.exchangeRate));
+
+	const largest = Math.max(...exchangeRates);
 	const difference = (smallest / largest);
 	return difference.toString().split(".")[1].length;
 }
@@ -928,9 +950,12 @@ export function getPriceArray(totalCost, currencies) {
 
 	if (!currencies) currencies = getCurrencyList()
 
-	const primaryCurrency = currencies.find(currency => currency.primary);
+	const primaryCurrencies = currencies.filter(currency => !currency.secondary);
+	const primaryCurrency = primaryCurrencies.find(currency => currency.primary);
 
-	if (currencies.length === 1) {
+	const allCommonExchangeRate = new Set(primaryCurrencies.map(currency => currency.exchangeRate));
+
+	if (primaryCurrencies.length === 1 || allCommonExchangeRate.size === 1) {
 		return [{
 			...primaryCurrency,
 			cost: totalCost,
@@ -948,9 +973,7 @@ export function getPriceArray(totalCost, currencies) {
 
 		let cost = totalCost;
 
-		for (const currency of currencies) {
-
-			if (currency.secondary) continue;
+		for (const currency of primaryCurrencies) {
 
 			const numCurrency = Math.floor(cost / currency.exchangeRate);
 
@@ -987,9 +1010,9 @@ export function getPriceArray(totalCost, currencies) {
 		});
 	}
 
-	for (const currency of currencies) {
+	for (const currency of primaryCurrencies) {
 
-		if ((currency === primaryCurrency && skipPrimary) || currency.secondary) continue;
+		if (currency === primaryCurrency && skipPrimary) continue;
 
 		const numCurrency = Math.floor(Helpers.roundToDecimals(fraction / currency.exchangeRate, decimals));
 
