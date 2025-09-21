@@ -15,7 +15,7 @@
 	const rarityColor = entry.rarityColor;
 	const quantityLeft = entry.quantityLeft;
 	const quantity = entry.quantity;
-	const currentQuantity = entry.currentQuantity;
+	const currentQuantity = entry.quantity;  // Gygax75 - default to max quantity (from currentQuantity).
 	const pileData = store.pileData;
 
 	let element = false;
