@@ -15,7 +15,7 @@
 	const rarityColor = entry.rarityColor;
 	const quantityLeft = entry.quantityLeft;
 	const quantity = entry.quantity;
-	const currentQuantity = entry.quantity;  // Gygax75 - default to max quantity (from currentQuantity).
+	const currentQuantity = entry.currentQuantity;
 	const pileData = store.pileData;
 
 	let element = false;
@@ -116,6 +116,14 @@
 			type="button"
 			disabled={!$quantityLeft || !$quantity}>
 			{localize("ITEM-PILES.Inspect.Take")}
+		</button>
+
+		<button
+			on:click={() => { entry.takeAll() }}
+			class="item-piles-item-take-button"
+			type="button"
+			disabled={!$quantityLeft || !$quantity}>
+			Take All
 		</button>
 
 	{:else if !entry.canStack && !entry.isCurrency}

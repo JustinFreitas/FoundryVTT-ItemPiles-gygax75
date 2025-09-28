@@ -212,6 +212,17 @@ export class PileItem extends PileBaseItem {
 		);
 	}
 
+	takeAll() {
+		const quantity = get(this.quantityLeft);
+		if (!quantity) return;
+		return game.itempiles.API.transferItems(
+			this.store.actor,
+			this.store.recipient,
+			[{ _id: this.id, quantity }],
+			{ interactionId: this.store.interactionId }
+		);
+	}
+
 	async remove() {
 		return game.itempiles.API.removeItems(this.store.actor, [this.id]);
 	}

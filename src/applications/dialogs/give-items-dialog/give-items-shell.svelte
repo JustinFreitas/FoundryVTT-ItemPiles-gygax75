@@ -16,7 +16,7 @@
 	const sliderQuantity = itemQuantity + (application.options?.quantityAdjustment ?? 0);
 	const canItemStack = PileUtilities.canItemStack(item);
 
-	let quantity = itemQuantity > 0 ? itemQuantity : 1;  // Gygax75 - default to max quantity.
+	let quantity = 1;
 	let secret = false;
 	let selectedActor = localStorage.getItem("item-piles-give-item") ?? false;
 
