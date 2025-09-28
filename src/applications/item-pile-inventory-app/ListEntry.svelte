@@ -118,6 +118,14 @@
 			{localize("ITEM-PILES.Inspect.Take")}
 		</button>
 
+		<button
+			on:click={() => { entry.takeAll() }}
+			class="item-piles-item-take-button"
+			type="button"
+			disabled={!$quantityLeft || !$quantity}>
+			Take All
+		</button>
+
 	{:else if !entry.canStack && !entry.isCurrency}
 
 		<button
