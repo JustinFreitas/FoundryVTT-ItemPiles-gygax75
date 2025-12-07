@@ -406,7 +406,11 @@ export function getCurrencyList(target = false, pileData = false) {
 	}
 
 	const primaryCurrencies = (pileData?.overrideCurrencies || game.itempiles.API.CURRENCIES);
-	const secondaryCurrencies = (pileData?.overrideSecondaryCurrencies || game.itempiles.API.SECONDARY_CURRENCIES).map(currency => {
+	const secondaryCurrenciesSource = Array.isArray(pileData?.overrideSecondaryCurrencies)
+		? pileData.overrideSecondaryCurrencies
+		: (game.itempiles.API.SECONDARY_CURRENCIES || []);
+
+	const secondaryCurrencies = secondaryCurrenciesSource.map(currency => {
 		currency.secondary = true;
 		return currency;
 	});
@@ -712,7 +716,7 @@ export function shouldEvaluateChange(target, changes) {
 		: baseFlags);
 	if (!isValidItemPile(target, flags)) return false;
 	return (flags.type === CONSTANTS.PILE_TYPES.CONTAINER
-			&& (flags.closedImage || flags.emptyImage || flags.openedImage || flags.lockedImage))
+		&& (flags.closedImage || flags.emptyImage || flags.openedImage || flags.lockedImage))
 		|| flags.displayOne || flags.showItemName || flags.overrideSingleItemScale;
 }
 
@@ -1611,22 +1615,22 @@ export function getPaymentData({
 	const buyerInfiniteCurrencies = buyerFlagData?.infiniteCurrencies;
 
 	const paymentData = purchaseData.map(data => {
-			const prices = getPriceData({
-				cost: data.cost,
-				item: data.item,
-				secondaryPrices: data.secondaryPrices,
-				seller,
-				buyer,
-				sellerFlagData,
-				buyerFlagData,
-				itemFlagData: data.itemFlagData,
-				quantity: data.quantity || 1
-			})[data.paymentIndex || 0];
-			return {
-				...prices,
-				item: data.item
-			};
-		})
+		const prices = getPriceData({
+			cost: data.cost,
+			item: data.item,
+			secondaryPrices: data.secondaryPrices,
+			seller,
+			buyer,
+			sellerFlagData,
+			buyerFlagData,
+			itemFlagData: data.itemFlagData,
+			quantity: data.quantity || 1
+		})[data.paymentIndex || 0];
+		return {
+			...prices,
+			item: data.item
+		};
+	})
 		.reduce((priceData, priceGroup) => {
 
 			priceData.reasons = [];
@@ -2175,16 +2179,16 @@ export function getNewItemsVaultPosition(item, gridData, { position = null } = {
 		}
 
 		cellLoop:
-			for (const { x, y } of cellsToCheck) {
-				for (let w = 0; w < width; w++) {
-					for (let h = 0; h < height; h++) {
-						if (grid[x + w][y + h]) {
-							continue cellLoop;
-						}
+		for (const { x, y } of cellsToCheck) {
+			for (let w = 0; w < width; w++) {
+				for (let h = 0; h < height; h++) {
+					if (grid[x + w][y + h]) {
+						continue cellLoop;
 					}
 				}
-				return { x, y, flipped };
 			}
+			return { x, y, flipped };
+		}
 		flipped = !flipped;
 	}
 
