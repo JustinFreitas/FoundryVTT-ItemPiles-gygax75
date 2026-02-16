@@ -14,9 +14,9 @@ Other works by us:
 - [Sequencer](https://foundryvtt.com/packages/sequencer) - Wow your players by playing visual effects on the canvas
 - [Tagger](https://foundryvtt.com/packages/tagger) - Tag objects in the scene and retrieve them with a powerful API
 
-Like what we've done? Buy us a coffee!
+Like what we've done? Support us on Patreon!
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/fantasycomputerworks)
+[![Support us on Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Dfantasycomputerworks%26type%3Dpatrons&style=for-the-badge)](https://patreon.com/fantasycomputerworks)
 
 ---
 
