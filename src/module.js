@@ -26,6 +26,7 @@ import { TJSPosition } from "#runtime/svelte/store/position";
 
 Hooks.once("init", async () => {
 	CONSTANTS.IS_V13 = foundry.utils.isNewerVersion(game.version, 13);
+	CONSTANTS.IS_V14 = foundry.utils.isNewerVersion(game.version, 14);
 	Object.freeze(CONSTANTS);
 
 	//CONFIG.debug.hooks = true;
