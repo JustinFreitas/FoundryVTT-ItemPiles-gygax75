@@ -42,7 +42,23 @@ function getFlagData(inDocument, flag, defaults, existing = false) {
 	if (flag === CONSTANTS.FLAGS.PILE) {
 		flags = migrateFlagData(inDocument, flags);
 	}
-	return foundry.utils.mergeObject(defaultFlags, flags);
+	const result = foundry.utils.mergeObject(defaultFlags, flags);
+	if (flag === CONSTANTS.FLAGS.PILE || flag === CONSTANTS.FLAGS.ITEM) {
+		const arrayProps = [
+			"overrideCurrencies", "overrideSecondaryCurrencies", "overrideItemFilters", 
+			"requiredItemProperties", "closedImages", "emptyImages", "openedImages", 
+			"lockedImages", "closeSounds", "openSounds", "lockedSounds", "unlockedSounds", 
+			"itemTypePriceModifiers", "actorPriceModifiers", "tablesForPopulate", 
+			"merchantColumns", "closedDays", "closedHolidays", "refreshItemsDays", 
+			"refreshItemsHolidays", "vaultAccess", "overheadCost", "prices", "sellPrices"
+		];
+		for (const prop of arrayProps) {
+			if (result[prop] && typeof result[prop] === "object" && !Array.isArray(result[prop])) {
+				result[prop] = Object.values(result[prop]);
+			}
+		}
+	}
+	return result;
 }
 
 export function migrateFlagData(document, data = false) {
