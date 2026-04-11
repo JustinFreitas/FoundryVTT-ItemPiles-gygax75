@@ -405,10 +405,15 @@ export function getCurrencyList(target = false, pileData = false) {
 		pileData = getActorFlagData(targetActor, { data: pileData });
 	}
 
-	const primaryCurrencies = (pileData?.overrideCurrencies || game.itempiles.API.CURRENCIES);
-	const secondaryCurrenciesSource = Array.isArray(pileData?.overrideSecondaryCurrencies)
-		? pileData.overrideSecondaryCurrencies
-		: (game.itempiles.API.SECONDARY_CURRENCIES || []);
+	let primaryCurrencies = (pileData?.overrideCurrencies || game.itempiles.API.CURRENCIES);
+	if (primaryCurrencies && typeof primaryCurrencies === "object" && !Array.isArray(primaryCurrencies)) {
+		primaryCurrencies = Object.values(primaryCurrencies);
+	}
+	
+	let secondaryCurrenciesSource = pileData?.overrideSecondaryCurrencies || game.itempiles.API.SECONDARY_CURRENCIES || [];
+	if (secondaryCurrenciesSource && typeof secondaryCurrenciesSource === "object" && !Array.isArray(secondaryCurrenciesSource)) {
+		secondaryCurrenciesSource = Object.values(secondaryCurrenciesSource);
+	}
 
 	const secondaryCurrencies = secondaryCurrenciesSource.map(currency => {
 		currency.secondary = true;
@@ -458,6 +463,9 @@ export function getActorRequiredItemProperties(target, pileData = false) {
 }
 
 export function cleanItemFilters(itemFilters) {
+	if (itemFilters && typeof itemFilters === "object" && !Array.isArray(itemFilters)) {
+		itemFilters = Object.values(itemFilters);
+	}
 	return itemFilters
 		? foundry.utils.duplicate(itemFilters).map(filter => {
 			filter.path = filter.path.trim();
@@ -732,7 +740,15 @@ export async function updateItemPileData(target, newFlags, tokenData) {
 	const documentTokens = documentActor.getActiveTokens();
 
 	const items = getActorItems(documentActor, { itemFilters: flagData.overrideItemFilters });
-	const actorCurrencies = (flagData.overrideCurrencies || []).concat(flagData.overrideSecondaryCurrencies || []);
+	let overrideCurrencies = flagData.overrideCurrencies || [];
+	if (overrideCurrencies && typeof overrideCurrencies === "object" && !Array.isArray(overrideCurrencies)) {
+		overrideCurrencies = Object.values(overrideCurrencies);
+	}
+	let overrideSecondaryCurrencies = flagData.overrideSecondaryCurrencies || [];
+	if (overrideSecondaryCurrencies && typeof overrideSecondaryCurrencies === "object" && !Array.isArray(overrideSecondaryCurrencies)) {
+		overrideSecondaryCurrencies = Object.values(overrideSecondaryCurrencies);
+	}
+	const actorCurrencies = overrideCurrencies.concat(overrideSecondaryCurrencies);
 	const currencies = getActorCurrencies(documentActor, { currencyList: actorCurrencies });
 
 	const pileData = { data: flagData, items, currencies };
