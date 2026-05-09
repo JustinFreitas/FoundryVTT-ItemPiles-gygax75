@@ -2233,7 +2233,7 @@ export function getVaultAccess(vaultActor, { flagData = false, hasRecipient = fa
 	const vaultFlags = getActorFlagData(vaultActor, { data: flagData });
 
 	const vaultAccess = vaultFlags.vaultAccess.filter(access => {
-		return fromUuidSync(access.uuid)?.isOwner;
+		return foundry.utils.fromUuidSync(access.uuid)?.isOwner;
 	});
 
 	return vaultAccess.reduce((acc, access) => {
@@ -2369,7 +2369,7 @@ export async function rollTable({
 	const rolledItems = [];
 	let currencies = [];
 
-	const table = await fromUuid(tableUuid);
+	const table = await foundry.utils.fromUuid(tableUuid);
 
 	if (!tableUuid.startsWith("Compendium")) {
 		if (resetTable) {
@@ -2496,7 +2496,7 @@ export async function rollMerchantTables({ tableData = false, actor = false } = 
 
 	for (const table of tableData) {
 
-		const rollableTable = await fromUuid(table.uuid);
+		const rollableTable = await foundry.utils.fromUuid(table.uuid);
 
 		if (!rollableTable) continue;
 
@@ -2514,7 +2514,7 @@ export async function rollMerchantTables({ tableData = false, actor = false } = 
 				if (roll.total <= 0) continue;
 				const rollResult = rollableTable.results.get(itemId).toObject();
 				const potentialPack = rollResult.documentUuid
-					? await fromUuid(rollResult.documentUuid)
+					? await foundry.utils.fromUuid(rollResult.documentUuid)
 					: game.packs.get(rollResult.documentCollection);
 
 				const typeIsRollTable = (rollResult.documentUuid ?? rollResult.documentCollection).includes("RollTable");
@@ -2603,7 +2603,7 @@ export async function rollMerchantTables({ tableData = false, actor = false } = 
 async function getTable(tableToGet) {
 	let table;
 	if (tableToGet.documentUuid) {
-		table = await fromUuid(tableToGet.documentUuid);
+		table = await foundry.utils.fromUuid(tableToGet.documentUuid);
 	} else if (tableToGet.documentCollection === "RollTable") {
 		table = game.tables.get(tableToGet.documentId);
 	} else {
@@ -2630,7 +2630,7 @@ async function getItem(rollData) {
 		});
 		const [uuid, name] = Helpers.random_array_element(uuidNameMap);
 		const itemName = rollDataText.replace(rollDataText.slice(firstIndex, lastIndex), name);
-		item = await fromUuid(uuid)
+		item = await foundry.utils.fromUuid(uuid)
 		const itemObj = item.toObject();
 		itemObj.name = itemName;
 		item = new Item.implementation(itemObj);
@@ -2642,17 +2642,8 @@ async function getItem(rollData) {
 		return item;
 	}
 
-	if (CONSTANTS.IS_V13 && rollData.documentUuid) {
-		return await fromUuid(rollData.documentUuid);
-	} else if (!CONSTANTS.IS_V13) {
-		if (rollData.documentCollection === "Item") {
-			return game.items.get(rollData.documentId);
-		} else {
-			const compendium = game.packs.get(rollData.documentCollection);
-			if (compendium) {
-				return await compendium.getDocument(rollData.documentId);
-			}
-		}
+	if (rollData.documentUuid) {
+		return await foundry.utils.fromUuid(rollData.documentUuid);
 	}
 
 	return false;

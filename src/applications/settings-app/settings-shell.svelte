@@ -61,7 +61,7 @@
 		const currencies = settings[SETTINGS.CURRENCIES].value.concat(settings[SETTINGS.SECONDARY_CURRENCIES].value)
 		for (const currency of currencies) {
 			if (!currency.data?.uuid) continue;
-			const actualItem = await fromUuid(currency.data?.uuid);
+			const actualItem = await foundry.utils.fromUuid(currency.data?.uuid);
 			try {
 				await actualItem.update({
 					name: currency.name,
@@ -207,6 +207,8 @@
 					         options={["None", ...Object.keys(getDocumentTemplates("Item"))]}/>
 					<Setting key={SETTINGS.ITEM_QUANTITY_ATTRIBUTE} itemAttribute
 					         bind:data="{settings[SETTINGS.ITEM_QUANTITY_ATTRIBUTE]}"/>
+					<Setting key={SETTINGS.ITEM_PRICE_ATTRIBUTE} itemAttribute
+					         bind:data="{settings[SETTINGS.ITEM_PRICE_ATTRIBUTE]}"/>
 					<Setting key={SETTINGS.ITEM_PREVIEW_PERMISSION_LEVEL}
 					         bind:data="{settings[SETTINGS.ITEM_PREVIEW_PERMISSION_LEVEL]}"/>
 					<SettingButton key={SETTINGS.CURRENCIES} bind:data="{settings[SETTINGS.CURRENCIES]}"/>
