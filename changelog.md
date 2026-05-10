@@ -1,5 +1,18 @@
 # Item Piles Changelog
 
+## Version 3.3.0
+
+- Added support for Foundry V14, and dropped support for Foundry V12
+- Fixed previewing items in trades and item piles failing in some systems by going through the item's own sheet rather than constructing one manually
+- Fixed read-only item previews failing to close in systems that submit item sheets on close, like Custom System Builder
+- Fixed item stacking detection in piles using the wrong actor reference, causing some items to incorrectly report as non-stackable
+- Fixed dropping an actor onto an item pile inventory throwing an error instead of setting the recipient
+- Fixed currency search filter hiding currencies whose sub-currencies matched the search query
+
+## Version 3.2.33
+
+- Fixed the Item Price Attribute setting being missing from the system settings tab
+
 ## Version 3.2.32
 
 - Added support for configuring the ownership level that item preview windows (opened when clicking the names of items in item piles) so that systems can better control what is and isn't shown to players

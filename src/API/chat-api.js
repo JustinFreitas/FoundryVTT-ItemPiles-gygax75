@@ -287,7 +287,7 @@ export default class ChatAPI {
 			}
 		}
 
-		const chatCardHtml = await renderTemplate(CONSTANTS.PATH + "templates/chat/looted.html", {
+		const chatCardHtml = await foundry.applications.handlebars.renderTemplate(CONSTANTS.PATH + "templates/chat/looted.html", {
 			message: game.i18n.format("ITEM-PILES.Chat.Pickup", { name: targetActor.name }),
 			itemPile: sourceActor,
 			actor: targetActor,
@@ -341,7 +341,7 @@ export default class ChatAPI {
 			return a.index - b.index;
 		})
 
-		const chatCardHtml = await renderTemplate(CONSTANTS.PATH + "templates/chat/looted.html", {
+		const chatCardHtml = await foundry.applications.handlebars.renderTemplate(CONSTANTS.PATH + "templates/chat/looted.html", {
 			message: game.i18n.format("ITEM-PILES.Chat.Pickup", { name: targetActor.name }),
 			itemPile: sourceActor,
 			actor: targetActor,
@@ -367,7 +367,7 @@ export default class ChatAPI {
 		const [items, itemCurrencies] = await this._formatItemData(sourceActor, pileDeltas.itemDeltas, divideBy);
 		const currencies = this._formatCurrencyData(sourceActor, pileDeltas.attributeDeltas, divideBy).concat(itemCurrencies);
 
-		const chatCardHtml = await renderTemplate(CONSTANTS.PATH + "templates/chat/looted.html", {
+		const chatCardHtml = await foundry.applications.handlebars.renderTemplate(CONSTANTS.PATH + "templates/chat/looted.html", {
 			message: game.i18n.format("ITEM-PILES.Chat.Split", { num_players: divideBy }),
 			itemPile: sourceActor,
 			items: items,
@@ -389,7 +389,7 @@ export default class ChatAPI {
 		const party_1_actor = Utilities.getActor(party_1.actor);
 		const party_2_actor = Utilities.getActor(party_2.actor);
 
-		const chatCardHtml = await renderTemplate(CONSTANTS.PATH + "templates/chat/trade-started.html", {
+		const chatCardHtml = await foundry.applications.handlebars.renderTemplate(CONSTANTS.PATH + "templates/chat/trade-started.html", {
 			party_1_actor,
 			party_2_actor,
 			publicTradeId,
@@ -431,7 +431,7 @@ export default class ChatAPI {
 
 		const enableCollapse = (party_1_data.items.length + party_1_data.currencies.length + party_2_data.items.length + party_2_data.currencies.length) > 6;
 
-		const chatCardHtml = await renderTemplate(CONSTANTS.PATH + "templates/chat/trade-complete.html", {
+		const chatCardHtml = await foundry.applications.handlebars.renderTemplate(CONSTANTS.PATH + "templates/chat/trade-complete.html", {
 			party_1: party_1_data,
 			party_2: party_2_data,
 			publicTradeId,
@@ -472,7 +472,7 @@ export default class ChatAPI {
 
 		const pileData = PileUtilities.getActorFlagData(sourceActor);
 
-		const chatCardHtml = await renderTemplate(CONSTANTS.PATH + "templates/chat/merchant-traded.html", {
+		const chatCardHtml = await foundry.applications.handlebars.renderTemplate(CONSTANTS.PATH + "templates/chat/merchant-traded.html", {
 			message: game.i18n.format("ITEM-PILES.Chat.MerchantTraded", {
 				name: targetActor.name,
 				merchant: sourceActor.name
@@ -522,7 +522,7 @@ export default class ChatAPI {
 			}
 		}
 
-		const chatCardHtml = await renderTemplate(CONSTANTS.PATH + "templates/chat/gave-items.html", {
+		const chatCardHtml = await foundry.applications.handlebars.renderTemplate(CONSTANTS.PATH + "templates/chat/gave-items.html", {
 			message: game.i18n.format("ITEM-PILES.Chat.GaveItems", { source: sourceActor.name, target: targetActor.name }),
 			source: sourceActor,
 			target: targetActor,
@@ -564,7 +564,7 @@ export default class ChatAPI {
 
 		const newItems = this._matchEntries(flags.items, items);
 
-		const chatCardHtml = await renderTemplate(CONSTANTS.PATH + "templates/chat/gave-items.html", {
+		const chatCardHtml = await foundry.applications.handlebars.renderTemplate(CONSTANTS.PATH + "templates/chat/gave-items.html", {
 			message: game.i18n.format("ITEM-PILES.Chat.GaveItems", { source: sourceActor.name, target: targetActor.name }),
 			source: sourceActor,
 			target: targetActor,
@@ -617,7 +617,7 @@ export default class ChatAPI {
 
 		const pileData = PileUtilities.getActorFlagData(sourceActor);
 
-		const chatCardHtml = await renderTemplate(CONSTANTS.PATH + "templates/chat/merchant-traded.html", {
+		const chatCardHtml = await foundry.applications.handlebars.renderTemplate(CONSTANTS.PATH + "templates/chat/merchant-traded.html", {
 			message: game.i18n.format("ITEM-PILES.Chat.MerchantTraded", {
 				name: targetActor.name,
 				merchant: sourceActor.name
