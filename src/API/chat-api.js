@@ -53,7 +53,10 @@ export default class ChatAPI {
 	}
 
 	static _renderChatMessage(app, html) {
-		html.find(".item-piles-specate-trade").click(function () {
+		// v13's renderChatMessageHTML passes a native HTMLElement; older
+		// renderChatMessage passes a jQuery object. Normalize to jQuery.
+		const $html = html instanceof HTMLElement ? $(html) : html;
+		$html.find(".item-piles-specate-trade").click(function () {
 			game.itempiles.API.spectateTrade($(this).data());
 		});
 	}
