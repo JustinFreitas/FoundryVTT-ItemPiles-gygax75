@@ -1,0 +1,3 @@
+# Keep the changelog LF-only so the release workflow's awk does not pick up a
+# trailing carriage return in the extracted "## Version" tag name.
+changelog.md text eol=lf
