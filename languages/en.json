@@ -75,6 +75,7 @@
       "Empty": "This pile is empty.",
       "Destroyed": "This pile no longer exists and lies barren.",
       "TakeAll": "Take All Items",
+      "TakeAllRow": "Take All",
       "Take": "Take",
       "Close": "Close Lid",
       "Leave": "Leave",

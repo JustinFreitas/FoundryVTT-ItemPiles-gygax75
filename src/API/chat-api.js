@@ -129,13 +129,7 @@ export default class ChatAPI {
 	static async _outputTransferItem(source, target, items, userId, interactionId) {
 		if (!PileUtilities.isItemPileLootable(source)) return;
 		if (!interactionId || game.user.id !== userId || !Helpers.getSetting(SETTINGS.OUTPUT_TO_CHAT)) return;
-        // HACK for Gygax75 - Creating new item caused duplicate reporting in chat.
-        const uniqueItems = items.filter((value, index, self) =>
-            index === self.findIndex((t) => (
-              t.folder === value.folder && t.name === value.name
-            ))
-          );
-		const [itemData, itemCurrencies] = await this._formatItemData(source, uniqueItems);
+		const [itemData, itemCurrencies] = await this._formatItemData(source, items);
 		return ItemPileSocket.executeAsGM(ItemPileSocket.HANDLERS.PICKUP_CHAT_MESSAGE, source.uuid, target.uuid, itemData, itemCurrencies, userId, interactionId);
 	}
 

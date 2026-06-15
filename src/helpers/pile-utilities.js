@@ -43,19 +43,15 @@ function getFlagData(inDocument, flag, defaults, existing = false) {
 		flags = migrateFlagData(inDocument, flags);
 	}
 	const result = foundry.utils.mergeObject(defaultFlags, flags);
-	if (flag === CONSTANTS.FLAGS.PILE || flag === CONSTANTS.FLAGS.ITEM) {
-		const arrayProps = [
-			"overrideCurrencies", "overrideSecondaryCurrencies", "overrideItemFilters", 
-			"requiredItemProperties", "closedImages", "emptyImages", "openedImages", 
-			"lockedImages", "closeSounds", "openSounds", "lockedSounds", "unlockedSounds", 
-			"itemTypePriceModifiers", "actorPriceModifiers", "tablesForPopulate", 
-			"merchantColumns", "closedDays", "closedHolidays", "refreshItemsDays", 
-			"refreshItemsHolidays", "vaultAccess", "overheadCost", "prices", "sellPrices"
-		];
-		for (const prop of arrayProps) {
-			if (result[prop] && typeof result[prop] === "object" && !Array.isArray(result[prop])) {
-				result[prop] = Object.values(result[prop]);
-			}
+	// Foundry v14 round-trips array-valued flags as `{0:…,1:…}` objects. Coerce any
+	// such property back to an array, driven off the defaults so this self-maintains
+	// as new array-valued flags are added upstream (rather than a hand-kept denylist).
+	for (const [prop, defaultValue] of Object.entries(defaultFlags)) {
+		if (Array.isArray(defaultValue)
+			&& result[prop]
+			&& typeof result[prop] === "object"
+			&& !Array.isArray(result[prop])) {
+			result[prop] = Object.values(result[prop]);
 		}
 	}
 	return result;

@@ -123,7 +123,7 @@
 			class="item-piles-item-take-button"
 			type="button"
 			disabled={!$quantityLeft || !$quantity}>
-			Take All
+			{localize("ITEM-PILES.Inspect.TakeAllRow")}
 		</button>
 
 	{:else if !entry.canStack && !entry.isCurrency}

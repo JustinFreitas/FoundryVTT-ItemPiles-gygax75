@@ -1,5 +1,16 @@
 # Item Piles Changelog
 
+## Version 3.3.2-gygax75.3
+
+- Items looted from a pile or bought from a merchant are now always created as fresh items on the receiving actor instead of stacking onto an existing matching item (Gygax75 house rule)
+- Added a "Take All" button to each row in the pile inventory window that transfers the full remaining quantity in one click
+- Dropping an item now defaults the quantity to the full stack instead of 1
+- Fixed looted items being reported twice in chat by correcting the underlying transfer quantity accounting (rather than de-duplicating the chat output)
+- Fixed item transfers throwing an error on systems without a `system.containerId` field; clearing the container association is now a no-op on non-D&D 5e systems
+- Fixed the Settings window failing to render on systems whose data models throw while computing default values (such as PF2e)
+- Fixed read-only item previews becoming editable for players on Foundry V14 by constructing the preview item without a parent actor
+- Fixed array-valued pile and merchant settings (currencies, item filters, price modifiers, images, sounds, and similar) being stored as objects on Foundry V14, now coerced back to arrays automatically as upstream adds new ones
+
 ## Version 3.3.1
 
 - Fixed players being unable to preview items in piles or merchants on Foundry V14

@@ -7,6 +7,20 @@ import CONSTANTS from "../constants/constants.js";
 
 export default class Transaction {
 
+	/**
+	 * Clears the dnd5e container association on an item's source data, if present.
+	 * Looted/created items should not retain a reference to a container that lives
+	 * on the source actor. Guarded so it is a no-op on systems that have no
+	 * `system` object or no `containerId` field (this module supports ~60 systems).
+	 *
+	 * @param {object} itemData  Item source data (the object pushed to itemsToCreate).
+	 */
+	static _clearContainerId(itemData) {
+		if (itemData?.system && "containerId" in itemData.system) {
+			itemData.system.containerId = "";
+		}
+	}
+
 	constructor(document) {
 		this.document = document;
 		this.documentFlags = PileUtilities.getActorFlagData(this.document);
@@ -95,29 +109,34 @@ export default class Transaction {
 						if (keepIfZero && type !== "currency") {
 							foundry.utils.setProperty(existingItemUpdate, CONSTANTS.FLAGS.ITEM + ".notForSale", newQuantity === 0);
 						}
+						this.itemDeltas.set(documentExistingItem.id, (this.itemDeltas.has(documentExistingItem.id) ? this.itemDeltas.get(documentExistingItem.id) : 0) + incomingQuantity);
+					} else if (remove || actorIsItemPile) {
+						// Update the existing stack in place (removals, and the source pile side
+						// of a transfer). Its delta is keyed on the existing item id and resolved
+						// in prepare() against this.document.items.
+						const update = Utilities.setItemQuantity(documentExistingItem.toObject(), newQuantity);
+						if (keepIfZero && type !== "currency") {
+							foundry.utils.setProperty(update, CONSTANTS.FLAGS.ITEM + ".notForSale", newQuantity === 0);
+						}
+						this.itemTypeMap.set(documentExistingItem.id, type);
+						this.itemsToUpdate.push(update);
+						this.itemDeltas.set(documentExistingItem.id, (this.itemDeltas.has(documentExistingItem.id) ? this.itemDeltas.get(documentExistingItem.id) : 0) + incomingQuantity);
 					} else {
-                        // HACK for Gygax75 - Always create new item instead of incrementing existing.
-                        if (remove || actorIsItemPile) {
-                            const update = Utilities.setItemQuantity(documentExistingItem.toObject(), newQuantity);
-                            if (keepIfZero && type !== "currency") {
-                                foundry.utils.setProperty(update, CONSTANTS.FLAGS.ITEM + ".notForSale", newQuantity === 0);
-                            }
-                            this.itemTypeMap.set(documentExistingItem.id, type);
-                            this.itemsToUpdate.push(update);
-                        } else {
-                            if (!itemData._id) {
-                                itemData._id = foundry.utils.randomID();
-                                itemData.name = documentExistingItem.name;
-                                itemData.type = documentExistingItem.type;
-                            }
-                            itemData.system.containerId = "";
-                            Utilities.setItemQuantity(itemData, incomingQuantity);
-                            this.itemsToCreate.push(itemData);
-                            this.itemTypeMap.set(itemData._id, type);
-                        }    
+						// HACK for Gygax75 - on the receiving actor, always create a fresh item
+						// instead of incrementing the existing stack. We deliberately do NOT add an
+						// itemDeltas entry here: created items are accounted for in commit() from the
+						// DB-returned documents. Adding a delta keyed on documentExistingItem.id as
+						// well would double-count this transfer (the bug the chat-api dedupe masked).
+						if (!itemData._id) {
+							itemData._id = foundry.utils.randomID();
+							itemData.name = documentExistingItem.name;
+							itemData.type = documentExistingItem.type;
+						}
+						Transaction._clearContainerId(itemData);
+						Utilities.setItemQuantity(itemData, incomingQuantity);
+						this.itemsToCreate.push(itemData);
+						this.itemTypeMap.set(itemData._id, type);
 					}
-
-					this.itemDeltas.set(documentExistingItem.id, (this.itemDeltas.has(documentExistingItem.id) ? this.itemDeltas.get(documentExistingItem.id) : 0) + incomingQuantity);
 
 				} else if (remove) {
 
@@ -130,7 +149,7 @@ export default class Transaction {
 						itemData._id = foundry.utils.randomID();
 					}
 					Utilities.setItemQuantity(itemData, incomingQuantity);
-                    itemData.system.containerId = "";
+					Transaction._clearContainerId(itemData);
 					this.itemsToCreate.push(itemData);
 					this.itemTypeMap.set(itemData._id, type);
 
@@ -146,7 +165,7 @@ export default class Transaction {
 						itemData._id = foundry.utils.randomID();
 					}
 					Utilities.setItemQuantity(itemData, incomingQuantity);
-                    itemData.system.containerId = "";
+					Transaction._clearContainerId(itemData);
 					this.itemsToCreate.push(itemData);
 					this.itemTypeMap.set(itemData._id, type);
 				}
