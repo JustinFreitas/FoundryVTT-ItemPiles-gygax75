@@ -11,7 +11,6 @@ export default class ChatAPI {
 	static initialize() {
 
 		Helpers.hooks.on("preCreateChatMessage", this._preCreateChatMessage.bind(this));
-		Helpers.hooks.on("renderChatMessage", this._renderChatMessage.bind(this));
 		Helpers.hooks.on("renderChatMessageHTML", this._renderChatMessage.bind(this));
 		Helpers.hooks.on(CONSTANTS.HOOKS.ITEM.TRANSFER, this._outputTransferItem.bind(this));
 		Helpers.hooks.on(CONSTANTS.HOOKS.ATTRIBUTE.TRANSFER, this._outputTransferCurrency.bind(this));
