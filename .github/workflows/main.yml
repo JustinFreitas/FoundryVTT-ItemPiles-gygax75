@@ -72,15 +72,16 @@ jobs:
       - name: Update Release with Files
         if: "!github.event.release.prerelease"
         id: create_version_release
-        uses: ncipollo/release-action@v1
+        uses: softprops/action-gh-release@v3
         with:
-          allowUpdates: true # Set this to false if you want to prevent updating existing releases
           name: ${{ github.event.release.name }}
           draft: false
           prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "./module.json, ./module.zip"
-          tag: ${{ github.event.release.tag_name }}
+          files: |
+            ./module.json
+            ./module.zip
+          tag_name: ${{ github.event.release.tag_name }}
           body: ${{ github.event.release.body }}
 
       - name: Get Compatibility
@@ -143,15 +144,16 @@ jobs:
       - name: Update Release with Files
         if: "github.event.release.prerelease"
         id: create_version_prerelease
-        uses: ncipollo/release-action@v1
+        uses: softprops/action-gh-release@v3
         with:
-          allowUpdates: true # Set this to false if you want to prevent updating existing releases
           name: ${{ github.event.release.name }}
           draft: false
           prerelease: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "./module.json, ./module.zip"
-          tag: ${{ github.event.release.tag_name }}
+          files: |
+            ./module.json
+            ./module.zip
+          tag_name: ${{ github.event.release.tag_name }}
           body: ${{ github.event.release.body }}
 
       #update next branch
