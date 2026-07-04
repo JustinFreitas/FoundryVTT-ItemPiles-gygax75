@@ -1,5 +1,9 @@
 # Item Piles Changelog
 
+## Version 3.3.2-gygax75.6
+
+- Fix KeyboardManager global deprecation warning on Foundry V13/V14 by upgrading @typhonjs-fvtt/runtime and @typhonjs-fvtt/standard dependencies.
+
 ## Version 3.3.2-gygax75.4
 
 - Fixed the `manifest` URL in `module.json` pointing at a non-existent `manifest.json` asset (now `module.json`), which caused Foundry to report "No module manifest found" when checking for updates
