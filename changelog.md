@@ -1,5 +1,10 @@
 # Item Piles Changelog
 
+## Version 3.3.2-gygax75.8
+
+- Fixed a critical bug where `ose.js` was not imported into `systems/_index.js`, preventing OSE data from loading.
+- Fixed a typo where the GP currency name was incorrectly set to "Cold Coins" instead of "Gold Coins".
+
 ## Version 3.3.2-gygax75.7
 
 - Fix KeyboardManager global deprecation warning on Foundry V13/V14 using a patched stable TyphonJS Svelte runtime dependency (restoring original button styling and alignment).

@@ -44,7 +44,7 @@ export default {
 			abbreviation: "{#}GP",
 			data: {
 				item: {
-					"name": "Cold Coins",
+					"name": "Gold Coins",
 					"type": "item",
 					"img": "systems/ose/assets/gold.png",
 					"system": {
