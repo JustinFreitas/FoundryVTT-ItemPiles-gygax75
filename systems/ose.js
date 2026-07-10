@@ -6,13 +6,13 @@ export default {
 	"ACTOR_CLASS_TYPE": "character",
 
 	// The item class type is the type of item that will be used for the default loot item
-	"ITEM_CLASS_LOOT_TYPE": "",
+	"ITEM_CLASS_LOOT_TYPE": "item",
 
 	// The item class type is the type of item that will be used for the default weapon item
-	"ITEM_CLASS_WEAPON_TYPE": "", 
+	"ITEM_CLASS_WEAPON_TYPE": "weapon",
 
 	// The item class type is the type of item that will be used for the default equipment item
-	"ITEM_CLASS_EQUIPMENT_TYPE": "",
+	"ITEM_CLASS_EQUIPMENT_TYPE": "armor",
 
 	// The item quantity attribute is the path to the attribute on items that denote how many of that item that exists
 	"ITEM_QUANTITY_ATTRIBUTE": "system.quantity.value",
@@ -49,7 +49,8 @@ export default {
 					"img": "systems/ose/assets/gold.png",
 					"system": {
 						"quantity": { "value": 1, "max": null },
-						"weight": 0.1,
+						// OSE measures encumbrance in coins: one coin weighs 1.
+						"weight": 1,
 						"cost": 1,
 						"treasure": true,
 					}

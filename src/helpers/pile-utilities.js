@@ -46,8 +46,11 @@ function getFlagData(inDocument, flag, defaults, existing = false) {
 	// Foundry v14 round-trips array-valued flags as `{0:…,1:…}` objects. Coerce any
 	// such property back to an array, driven off the defaults so this self-maintains
 	// as new array-valued flags are added upstream (rather than a hand-kept denylist).
+	// The override flags default to `false` when disabled but hold an array when set,
+	// so their defaults cannot identify them as array-valued.
+	const arrayWhenEnabled = ["overrideCurrencies", "overrideSecondaryCurrencies", "overrideItemFilters"];
 	for (const [prop, defaultValue] of Object.entries(defaultFlags)) {
-		if (Array.isArray(defaultValue)
+		if ((Array.isArray(defaultValue) || arrayWhenEnabled.includes(prop))
 			&& result[prop]
 			&& typeof result[prop] === "object"
 			&& !Array.isArray(result[prop])) {

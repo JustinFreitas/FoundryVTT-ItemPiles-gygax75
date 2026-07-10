@@ -1,5 +1,13 @@
 # Item Piles Changelog
 
+## Version 3.3.2-gygax75.9
+
+- Fixed currency, secondary currency, and item filter overrides on piles and merchants being stored as objects instead of arrays on Foundry V14; their defaults are `false` rather than arrays, so the defaults-driven coercion introduced in 3.3.2-gygax75.3 skipped them, breaking the pile UI when overrides were configured
+- Item-based currencies are now exempt from the "always create fresh items" house rule and stack on the receiving actor; currency totals and merchant payments only read a single stack per currency, so fragmented coin stacks undercounted money and could be driven to negative quantities
+- Fixed a transaction bug where a single currency in a mixed item list caused every later item in that list to also be treated as currency
+- OSE: corrected coin weight from 0.1 to 1 (OSE measures encumbrance in coins) and set the default loot ("item"), weapon ("weapon"), and equipment ("armor") item types
+- Release workflow: merged the duplicated manifest substitution steps into one and switched from `npm install` to `npm ci` so releases build from the lockfile
+
 ## Version 3.3.2-gygax75.8
 
 - Fixed a critical bug where `ose.js` was not imported into `systems/_index.js`, preventing OSE data from loading.

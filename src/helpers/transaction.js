@@ -48,7 +48,9 @@ export default class Transaction {
 
 			let item = data.item ?? data;
 
-			type = PileUtilities.isItemCurrency(item) ? "currency" : type;
+			// Per-entry type: reassigning the shared `type` parameter here would leak
+			// "currency" onto every later item in a mixed list.
+			const entryType = PileUtilities.isItemCurrency(item) ? "currency" : type;
 
 			let flags = data.flags ?? false;
 			let itemData = item instanceof Item ? item.toObject() : foundry.utils.deepClone(item);
@@ -62,7 +64,7 @@ export default class Transaction {
 			let itemId = itemData._id ?? itemData.id;
 			let documentHasItem = false;
 			let documentExistingItem = false;
-			if (this.documentFlags.type === CONSTANTS.PILE_TYPES.VAULT && type !== "currency" && !remove) {
+			if (this.documentFlags.type === CONSTANTS.PILE_TYPES.VAULT && entryType !== "currency" && !remove) {
 				const documentExistingItems = Utilities.findSimilarItem(this.document.items, itemData, {
 					returnOne: false
 				});
@@ -84,7 +86,7 @@ export default class Transaction {
 
 			const canItemStack = PileUtilities.canItemStack(documentExistingItem || itemData, this.document);
 
-			if (remove && (keepIfZero || type === "currency")) {
+			if (remove && (keepIfZero || entryType === "currency")) {
 				this.itemsToNotDelete.add(item.id);
 			}
 
@@ -106,19 +108,23 @@ export default class Transaction {
 
 					if (existingItemUpdate) {
 						Utilities.setItemQuantity(existingItemUpdate, newQuantity);
-						if (keepIfZero && type !== "currency") {
+						if (keepIfZero && entryType !== "currency") {
 							foundry.utils.setProperty(existingItemUpdate, CONSTANTS.FLAGS.ITEM + ".notForSale", newQuantity === 0);
 						}
 						this.itemDeltas.set(documentExistingItem.id, (this.itemDeltas.has(documentExistingItem.id) ? this.itemDeltas.get(documentExistingItem.id) : 0) + incomingQuantity);
-					} else if (remove || actorIsItemPile) {
-						// Update the existing stack in place (removals, and the source pile side
-						// of a transfer). Its delta is keyed on the existing item id and resolved
-						// in prepare() against this.document.items.
+					} else if (remove || actorIsItemPile || entryType === "currency") {
+						// Update the existing stack in place (removals, the source pile side of a
+						// transfer, and item-based currencies). Currencies are exempt from the
+						// create-new hack below: getActorCurrencies only reads a single stack per
+						// currency, so fragmenting coins across multiple item documents undercounts
+						// the actor's money and lets payments drive one stack negative. The delta is
+						// keyed on the existing item id and resolved in prepare() against
+						// this.document.items.
 						const update = Utilities.setItemQuantity(documentExistingItem.toObject(), newQuantity);
-						if (keepIfZero && type !== "currency") {
+						if (keepIfZero && entryType !== "currency") {
 							foundry.utils.setProperty(update, CONSTANTS.FLAGS.ITEM + ".notForSale", newQuantity === 0);
 						}
-						this.itemTypeMap.set(documentExistingItem.id, type);
+						this.itemTypeMap.set(documentExistingItem.id, entryType);
 						this.itemsToUpdate.push(update);
 						this.itemDeltas.set(documentExistingItem.id, (this.itemDeltas.has(documentExistingItem.id) ? this.itemDeltas.get(documentExistingItem.id) : 0) + incomingQuantity);
 					} else {
@@ -135,7 +141,7 @@ export default class Transaction {
 						Transaction._clearContainerId(itemData);
 						Utilities.setItemQuantity(itemData, incomingQuantity);
 						this.itemsToCreate.push(itemData);
-						this.itemTypeMap.set(itemData._id, type);
+						this.itemTypeMap.set(itemData._id, entryType);
 					}
 
 				} else if (remove) {
@@ -151,7 +157,7 @@ export default class Transaction {
 					Utilities.setItemQuantity(itemData, incomingQuantity);
 					Transaction._clearContainerId(itemData);
 					this.itemsToCreate.push(itemData);
-					this.itemTypeMap.set(itemData._id, type);
+					this.itemTypeMap.set(itemData._id, entryType);
 
 				}
 
@@ -167,7 +173,7 @@ export default class Transaction {
 					Utilities.setItemQuantity(itemData, incomingQuantity);
 					Transaction._clearContainerId(itemData);
 					this.itemsToCreate.push(itemData);
-					this.itemTypeMap.set(itemData._id, type);
+					this.itemTypeMap.set(itemData._id, entryType);
 				}
 			}
 		}

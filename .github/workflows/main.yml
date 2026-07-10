@@ -14,15 +14,17 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Substitute the Manifest and Download URLs in the module.json
-      # for a FULL RELEASE
+      # Substitute the Manifest and Download URLs in the module.json.
+      # Full releases point the manifest at the latest release asset; pre-releases
+      # point it at the live module.json on the next branch, updated after tag.
       - name: Substitute Manifest and Download Links For Versioned Ones
-        if: "!github.event.release.prerelease"
-        id: sub_release_manifest_version
+        id: sub_manifest_version
         env:
           VERSION: ${{github.event.release.tag_name}}
           URL: https://github.com/${{github.repository}}
-          MANIFEST: https://github.com/${{github.repository}}/releases/latest/download/module.json
+          MANIFEST: ${{ github.event.release.prerelease
+            && format('https://raw.githubusercontent.com/{0}/next/module.json', github.repository)
+            || format('https://github.com/{0}/releases/latest/download/module.json', github.repository) }}
           DOWNLOAD: https://github.com/${{github.repository}}/releases/download/${{github.event.release.tag_name}}/module.zip
         run: |
           node -e '
@@ -36,31 +38,8 @@ jobs:
             fs.writeFileSync(f, JSON.stringify(m, null, 2) + "\n");
           '
 
-      # Substitute the Manifest and Download URLs in the module.json
-      # for a PRE RELEASE. Manifest pointing to live module.json on branch,
-      # which is updated after tag.
-      - name: Substitute Manifest and Download Links For Versioned Ones
-        if: "github.event.release.prerelease"
-        id: sub_prerelease_manifest_version
-        env:
-          VERSION: ${{github.event.release.tag_name}}
-          URL: https://github.com/${{github.repository}}
-          MANIFEST: https://raw.githubusercontent.com/${{github.repository}}/next/module.json
-          DOWNLOAD: https://github.com/${{github.repository}}/releases/download/${{github.event.release.tag_name}}/module.zip
-        run: |
-          node -e '
-            const fs = require("fs");
-            const f = "module.json";
-            const m = JSON.parse(fs.readFileSync(f, "utf8"));
-            m.version = process.env.VERSION;
-            m.url = process.env.URL;
-            m.manifest = process.env.MANIFEST;
-            m.download = process.env.DOWNLOAD;
-            fs.writeFileSync(f, JSON.stringify(m, null, 2) + "\n");
-          '
-
-      # Install packages.
-      - run: npm install
+      # Install packages from the lockfile.
+      - run: npm ci
 
       # Build distribution.
       - run: npm run build
