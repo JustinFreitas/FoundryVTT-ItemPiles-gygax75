@@ -798,7 +798,7 @@ export async function updateItemPileData(target, newFlags, tokenData) {
 	const documentTokens = documentActor.getActiveTokens();
 
 	const items = getActorItems(documentActor, { itemFilters: flagData.overrideItemFilters });
-	const actorCurrencies = flagData.overrideCurrencies.concat(flagData.overrideSecondaryCurrencies);
+	const actorCurrencies = (flagData.overrideCurrencies || []).concat(flagData.overrideSecondaryCurrencies || []);
 	const currencies = getActorCurrencies(documentActor, { currencyList: actorCurrencies });
 
 	const pileData = { data: flagData, items, currencies };

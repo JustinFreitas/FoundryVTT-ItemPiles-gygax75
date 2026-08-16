@@ -4,6 +4,7 @@
 
 - Merged upstream updates 3.3.3 and 3.3.4 into the gygax75 release line
 - Preserved gygax75 house rules and system customizations (fresh item creation on loot/buy, coin stacking exemption, OSE settings, and V14 overrides)
+- Guarded `overrideCurrencies` and `overrideSecondaryCurrencies` when updating pile data
 
 ## Version 3.3.4
 
