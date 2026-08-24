@@ -122,12 +122,11 @@ export function canItemStack(item, targetActor) {
 	if (actorFlagData.enabled && actorFlagData.type === CONSTANTS.PILE_TYPES.VAULT && itemFlagData.vaultExpander) {
 		return false;
 	}
-	if (isItemCurrency(itemData)) return true;
 	if (typeof actorFlagData.canStackItems === "boolean") {
 		actorFlagData.canStackItems = actorFlagData.canStackItems ? "yes" : "no";
 	}
-	if (!Utilities.isItemStackable(itemData)) return false;
-	if (actorFlagData.canStackItems.includes("always")) {
+	if (!Utilities.isItemStackable(itemData) && !isItemCurrency(itemData)) return false;
+	if (actorFlagData.canStackItems && actorFlagData.canStackItems.includes("always")) {
 		return actorFlagData.canStackItems.endsWith("yes");
 	}
 	return {
@@ -351,12 +350,13 @@ export function getActorCurrencies(target, {
 		}
 		const itemData = CompendiumUtilities.getItemFromCache(currency.data.uuid) || currency.data.item || false;
 		if (!itemData) return false;
-		const item = Utilities.findSimilarItem(actorItems, itemData);
+		const items = Utilities.findSimilarItem(actorItems, itemData, { returnOne: false });
+		const item = items[0] || false;
 		const clonedItemData = foundry.utils.deepClone(itemData);
 		clonedItemData._id = item?.id ?? itemData._id;
 		const clonedData = { ...currency.data, item: clonedItemData };
 		return {
-			...currency, data: clonedData, quantity: 0, id: item?.id ?? item?._id ?? itemData._id ?? null, item, index
+			...currency, data: clonedData, quantity: 0, id: item?.id ?? item?._id ?? itemData._id ?? null, item, items, index
 		}
 	})).filter(Boolean);
 
@@ -365,6 +365,8 @@ export function getActorCurrencies(target, {
 	currencies = currencies.map(currency => {
 		if (currency.type === "attribute") {
 			currency.quantity = Utilities.sanitizeNumber(foundry.utils.getProperty(actor, currency.path))
+		} else if (currency.items?.length) {
+			currency.quantity = currency.items.reduce((acc, it) => acc + Utilities.getItemQuantity(it), 0);
 		} else if (currency.item) {
 			currency.quantity = Utilities.getItemQuantity(currency.item);
 		}

@@ -125,6 +125,9 @@
 					<button type="button" on:click={() => { store.update() }}>
 						<i class="fas fa-save"></i> {localize("ITEM-PILES.Applications.ItemPileConfig.Update")}
 					</button>
+					<button type="button" on:click={() => { store.consolidate() }}>
+						<i class="fas fa-compress-arrows-alt"></i> {localize("ITEM-PILES.Inspect.Consolidate")}
+					</button>
 				{/if}
 
 				{#if $pileData.splitAllEnabled && !$deleted}
@@ -215,5 +218,29 @@
     max-width: 25px;
     max-height: 25px;
     margin: 2px;
+  }
+
+  .sheet-footer {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    button {
+      flex: 1 1 0;
+      white-space: nowrap;
+      font-size: 0.8rem;
+      padding: 0 4px;
+      height: 28px;
+      line-height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin: 0;
+
+      i {
+        margin-right: 2px;
+      }
+    }
   }
 </style>

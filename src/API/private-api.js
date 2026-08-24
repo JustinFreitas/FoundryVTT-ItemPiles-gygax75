@@ -1121,7 +1121,10 @@ export default class PrivateAPI {
 	static async _commitDocumentChanges(documentUuid, {
 		documentChanges = {}, itemsToUpdate = [], itemsToDelete = [], itemsToCreate = []
 	} = {}) {
-		const targetDocument = Utilities.getDocument(documentUuid);
+		let targetDocument = Utilities.getActor(documentUuid) ?? Utilities.getDocument(documentUuid);
+		if (targetDocument instanceof TokenDocument || (foundry.canvas?.placeables?.Token && targetDocument instanceof foundry.canvas.placeables.Token)) {
+			targetDocument = targetDocument.actor;
+		}
 		if (!foundry.utils.isEmpty(documentChanges)) {
 			await targetDocument.update(documentChanges);
 		}
@@ -1956,22 +1959,27 @@ export default class PrivateAPI {
 		}
 
 		dropData.itemData.quantity = 1;
+		let itemQuantity = Utilities.getItemQuantity(dropData.itemData.item);
+		if (itemQuantity > 0) {
+			dropData.itemData.quantity = itemQuantity;
+		}
 
-		if (PileUtilities.canItemStack(dropData.itemData.item, targetActor)) {
-
-			let itemQuantity = Utilities.getItemQuantity(dropData.itemData.item);
-
-			if (!itemQuantity || itemQuantity <= 0) {
-				Helpers.custom_warning(game.i18n.localize("ITEM-PILES.Errors.ItemNoQuantity"), true);
-				return;
-			}
+		if (Utilities.isItemStackable(dropData.itemData.item) || PileUtilities.isItemCurrency(dropData.itemData.item) || itemQuantity > 1 || (!dropData.source && game.user.isGM)) {
 
 			if (!hotkeyActionState.forceDropOneItem) {
 
 				if (!dropData.skipCheck) {
 					const item = new Item.implementation(dropData.itemData.item);
-					itemQuantity = await DropItemDialog.show(item, dropData.target, { unlimitedQuantity: !dropData.source && game.user.isGM });
-					if (!itemQuantity) return;
+					const result = await DropItemDialog.show(item, dropData.target, { unlimitedQuantity: !dropData.source && game.user.isGM });
+					if (!result) return;
+					if (typeof result === "object" && result !== null) {
+						itemQuantity = result.quantity;
+						if (result.createNewRow !== undefined) {
+							foundry.utils.setProperty(dropData.itemData.item, CONSTANTS.FLAGS.ITEM + ".canStack", result.createNewRow ? "no" : "yes");
+						}
+					} else {
+						itemQuantity = result;
+					}
 				}
 
 				dropData.itemData.quantity = Utilities.sanitizeNumber(itemQuantity);
@@ -2047,16 +2055,21 @@ export default class PrivateAPI {
 
 		if (user?.active || gms.length || game.user.isGM) {
 
-			if (PileUtilities.canItemStack(dropData.itemData.item)) {
-				let itemQuantity = Utilities.getItemQuantity(item);
-				if ((!itemQuantity || itemQuantity <= 0)) {
-					Helpers.custom_warning(game.i18n.localize("ITEM-PILES.Errors.ItemNoQuantity"), true);
-					return;
-				}
+			let itemQuantity = Utilities.getItemQuantity(item);
+			if (Utilities.isItemStackable(dropData.itemData.item) || PileUtilities.isItemCurrency(dropData.itemData.item) || itemQuantity > 1) {
 				if (!options?.skipQuantityDialog) {
-					dropData.itemData.quantity = await DropItemDialog.show(item, targetActor, {
+					const result = await DropItemDialog.show(item, targetActor, {
 						localizationTitle: "GiveItem"
 					});
+					if (!result) return;
+					if (typeof result === "object" && result !== null) {
+						dropData.itemData.quantity = result.quantity;
+						if (result.createNewRow !== undefined) {
+							foundry.utils.setProperty(dropData.itemData.item, CONSTANTS.FLAGS.ITEM + ".canStack", result.createNewRow ? "no" : "yes");
+						}
+					} else {
+						dropData.itemData.quantity = result;
+					}
 				} else if (!dropData.itemData.quantity) {
 					dropData.itemData.quantity = 1;
 				}

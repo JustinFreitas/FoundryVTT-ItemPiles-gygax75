@@ -27,6 +27,8 @@
     "Notifications": {
       "SystemSupportFound": "System support found! Applying default system settings to Item Piles",
       "UpdateItemPileSuccess": "Item Pile successfully updated.",
+      "ConsolidateSuccess": "Successfully consolidated duplicate items and currencies.",
+      "ConsolidateNoDuplicates": "No duplicate stacks found to consolidate.",
       "UpdateMerchantSuccess": "Merchant successfully updated.",
       "ItemTransferred": "{source_actor_name}'s {item_name} was given to {target_actor_name}.",
       "ItemAdded": "{item_name} was added to {target_actor_name}.",
@@ -86,7 +88,8 @@
       "SplitAll": "Split {num_players} ways",
       "SplitItems": "Split items {num_players} ways",
       "SplitCurrencies": "Split currency {num_players} ways",
-      "SplitNoPlayers": "No characters were found to split the contents with."
+      "SplitNoPlayers": "No characters were found to split the contents with.",
+      "Consolidate": "Consolidate"
     },
     "Trade": {
       "Title": "Item Piles: Trading",
@@ -608,11 +611,11 @@
           "DeleteWhenEmptyYes": "Yes, delete when empty",
           "DeleteWhenEmptyNo": "No, don't delete when empty",
           "CanStackItems": "Can Stack Items",
-          "CanStackItemsExplanation": "With this setting, items added to the item pile will stack with similar items. This can also be controlled per-item in their configuration. Note: This is dependent on the system as well, since some items do not have quantity so they can never be stacked.",
-          "CanStackItemsYes": "Yes, stack items (unless item says otherwise)",
-          "CanStackItemsNo": "No, stack items (unless item says otherwise)",
+          "CanStackItemsExplanation": "With this setting enabled, identical items added to the item pile will merge into existing stacks. When set to 'No' (default), each added item or currency bundle creates its own distinct row.",
+          "CanStackItemsYes": "Yes, merge/stack into existing row",
+          "CanStackItemsNo": "No, create new row (default)",
           "CanStackItemsYesAlways": "Yes, always stack items",
-          "CanStackItemsNoAlways": "No, never stack items",
+          "CanStackItemsNoAlways": "No, always create new row (never stack)",
           "OverrideCurrencies": "Override Currencies",
           "OverrideCurrenciesExplanation": "Configure if this pile should be able to transfer other currencies than the default.",
           "ConfigureOverrideCurrencies": "Configure Override Currencies",

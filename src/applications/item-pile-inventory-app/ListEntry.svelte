@@ -68,14 +68,14 @@
 				>
 					{$name}
 				</p>
-				{#if !$editQuantities && (entry.canStack || !entry.id) && ($pileData.shareCurrenciesEnabled || !currency)}
+				{#if !$editQuantities && (entry.canStack || entry.isCurrency || entry.hasQuantity || !entry.id) && ($pileData.shareCurrenciesEnabled || !currency)}
 					<span class="item-piles-small-text">(x{$quantity})</span>
 				{/if}
 			</div>
 		</div>
 	</div>
 
-	{#if entry.canStack || !entry.id}
+	{#if entry.canStack || entry.isCurrency || entry.hasQuantity || !entry.id}
 
 		<div class="item-piles-quantity-container" style="flex: 0 1 150px;">
 
@@ -126,7 +126,7 @@
 			{localize("ITEM-PILES.Inspect.TakeAllRow")}
 		</button>
 
-	{:else if !entry.canStack && !entry.isCurrency}
+	{:else if !entry.canStack && !entry.isCurrency && !entry.hasQuantity}
 
 		<button
 			on:click={() => { entry.remove() }}

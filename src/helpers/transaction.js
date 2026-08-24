@@ -98,7 +98,7 @@ export default class Transaction {
 
 				const itemQuantity = Utilities.getItemQuantity(documentExistingItem);
 
-				if (itemQuantity > 1 || canItemStack) {
+				if (canItemStack) {
 
 					const newQuantity = itemQuantity + incomingQuantity;
 
@@ -112,14 +112,7 @@ export default class Transaction {
 							foundry.utils.setProperty(existingItemUpdate, CONSTANTS.FLAGS.ITEM + ".notForSale", newQuantity === 0);
 						}
 						this.itemDeltas.set(documentExistingItem.id, (this.itemDeltas.has(documentExistingItem.id) ? this.itemDeltas.get(documentExistingItem.id) : 0) + incomingQuantity);
-					} else if (remove || actorIsItemPile || entryType === "currency") {
-						// Update the existing stack in place (removals, the source pile side of a
-						// transfer, and item-based currencies). Currencies are exempt from the
-						// create-new hack below: getActorCurrencies only reads a single stack per
-						// currency, so fragmenting coins across multiple item documents undercounts
-						// the actor's money and lets payments drive one stack negative. The delta is
-						// keyed on the existing item id and resolved in prepare() against
-						// this.document.items.
+					} else {
 						const update = Utilities.setItemQuantity(documentExistingItem.toObject(), newQuantity);
 						if (keepIfZero && entryType !== "currency") {
 							foundry.utils.setProperty(update, CONSTANTS.FLAGS.ITEM + ".notForSale", newQuantity === 0);
@@ -127,21 +120,6 @@ export default class Transaction {
 						this.itemTypeMap.set(documentExistingItem.id, entryType);
 						this.itemsToUpdate.push(update);
 						this.itemDeltas.set(documentExistingItem.id, (this.itemDeltas.has(documentExistingItem.id) ? this.itemDeltas.get(documentExistingItem.id) : 0) + incomingQuantity);
-					} else {
-						// HACK for Gygax75 - on the receiving actor, always create a fresh item
-						// instead of incrementing the existing stack. We deliberately do NOT add an
-						// itemDeltas entry here: created items are accounted for in commit() from the
-						// DB-returned documents. Adding a delta keyed on documentExistingItem.id as
-						// well would double-count this transfer (the bug the chat-api dedupe masked).
-						if (!itemData._id) {
-							itemData._id = foundry.utils.randomID();
-							itemData.name = documentExistingItem.name;
-							itemData.type = documentExistingItem.type;
-						}
-						Transaction._clearContainerId(itemData);
-						Utilities.setItemQuantity(itemData, incomingQuantity);
-						this.itemsToCreate.push(itemData);
-						this.itemTypeMap.set(itemData._id, entryType);
 					}
 
 				} else if (remove) {
@@ -151,9 +129,7 @@ export default class Transaction {
 
 				} else {
 
-					if (!itemData._id) {
-						itemData._id = foundry.utils.randomID();
-					}
+					itemData._id = foundry.utils.randomID();
 					Utilities.setItemQuantity(itemData, incomingQuantity);
 					Transaction._clearContainerId(itemData);
 					this.itemsToCreate.push(itemData);

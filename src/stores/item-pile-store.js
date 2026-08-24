@@ -107,14 +107,41 @@ export default class ItemPileStore {
 	}
 
 	static getStore(actor) {
+		if (!actor) return undefined;
 		const uuid = Utilities.getUuid(actor);
-		return __STORES__.get(uuid);
+		if (__STORES__.has(uuid)) return __STORES__.get(uuid);
+		if (actor.parent) {
+			const parentUuid = Utilities.getUuid(actor.parent);
+			if (__STORES__.has(parentUuid)) return __STORES__.get(parentUuid);
+		}
+		if (actor.actor) {
+			const actorUuid = Utilities.getUuid(actor.actor);
+			if (__STORES__.has(actorUuid)) return __STORES__.get(actorUuid);
+		}
+		if (actor.token) {
+			const tokenUuid = Utilities.getUuid(actor.token);
+			if (__STORES__.has(tokenUuid)) return __STORES__.get(tokenUuid);
+		}
+		return undefined;
 	}
 
 	static notifyChanges(event, actor, ...args) {
-		const store = this.getStore(actor);
-		if (store && store[event]) {
-			store[event](...args);
+		for (const store of __STORES__.values()) {
+			if (!store[event]) continue;
+			const actorObj = Utilities.getActor(actor);
+			const matches = (
+				store.actor === actor ||
+				store.actor === actorObj ||
+				store.actor === actor?.actor ||
+				store.actor === actor?.parent?.actor ||
+				store.uuid === Utilities.getUuid(actor) ||
+				store.uuid === Utilities.getUuid(actorObj) ||
+				store.uuid === Utilities.getUuid(actor?.parent) ||
+				store.uuid === Utilities.getUuid(actor?.actor)
+			);
+			if (matches) {
+				store[event](...args);
+			}
 		}
 	}
 
@@ -343,9 +370,12 @@ export default class ItemPileStore {
 
 		PileUtilities.getActorCurrencies(this.actor, { forActor: this.recipient, getAll: true }).forEach(currency => {
 			if (currency.type === "item") {
-				if (!currency.item) return;
-				if (items.some(existingItem => existingItem.item === currency.item)) return;
-				items.push(new this.ItemClass(this, currency.item, true, !!currency?.secondary));
+				const currencyItems = currency.items?.length ? currency.items : (currency.item ? [currency.item] : []);
+				currencyItems.forEach(curItem => {
+					if (!curItem) return;
+					if (items.some(existingItem => existingItem.item === curItem || existingItem.id === curItem.id)) return;
+					items.push(new this.ItemClass(this, curItem, true, !!currency?.secondary));
+				});
 			} else {
 				if (attributes.some(existingAttribute => existingAttribute.path === currency.path)) return;
 				attributes.push(new this.AttributeClass(this, currency, true, !!currency?.secondary));
@@ -527,21 +557,29 @@ export default class ItemPileStore {
 	}
 
 	createItem(item) {
-		if (PileUtilities.isItemInvalid(this.actor, item)) return;
+		if (PileUtilities.isItemInvalid(this.actor, item)) {
+			return;
+		}
 		const items = get(this.allItems);
+		const isCurrency = PileUtilities.isItemCurrency(item);
 		const deletedItems = items
-			.filter(item => item.id === null)
-			.map(item => ({
-				pileItem: item,
-				...item.similarities
+			.filter(it => it.id === null)
+			.map(it => ({
+				pileItem: it,
+				...it.similarities
 			}));
 		const previouslyDeletedItem = Utilities.findSimilarItem(deletedItems, item);
 		if (previouslyDeletedItem) {
+			previouslyDeletedItem.pileItem.isCurrency = isCurrency;
 			previouslyDeletedItem.pileItem.setup(item);
+			if (previouslyDeletedItem.pileItem.setupProperties) {
+				previouslyDeletedItem.pileItem.setupProperties();
+			}
 		} else {
-			items.push(new this.ItemClass(this, item));
+			items.push(new this.ItemClass(this, item, isCurrency));
 		}
-		this.allItems.set(items);
+		this.allItems.set([...items]);
+		this.refreshItems();
 	}
 
 	deleteItem(item) {
@@ -552,11 +590,13 @@ export default class ItemPileStore {
 		pileItem.unsubscribe();
 		if (get(this.editQuantities) || !InterfaceTracker.isOpened(this.application.id)) {
 			items.splice(items.indexOf(pileItem), 1);
-			this.allItems.set(items);
+			this.allItems.set([...items]);
+			this.refreshItems();
 		} else {
 			pileItem.id = null;
 			pileItem.quantity.set(0);
 			pileItem.quantityLeft.set(0);
+			this.refreshItems();
 		}
 	}
 
@@ -628,6 +668,54 @@ export default class ItemPileStore {
 
 		Helpers.custom_notify(game.i18n.localize("ITEM-PILES.Notifications.UpdateItemPileSuccess"));
 
+	}
+
+	async consolidate() {
+		const items = Array.from(this.actor.items);
+		if (!items.length) return;
+
+		const groups = new Map();
+		for (const item of items) {
+			const cost = Number(item.system?.cost ?? 0);
+			const weight = Number(item.system?.weight ?? 0);
+			const key = `${item.name}|${item.type}|${cost}|${weight}`;
+			if (!groups.has(key)) groups.set(key, []);
+			groups.get(key).push(item);
+		}
+
+		const itemsToUpdate = [];
+		const itemsToDelete = [];
+
+		for (const group of groups.values()) {
+			if (group.length > 1) {
+				const primary = group[0];
+				const totalQuantity = group.reduce((sum, item) => sum + (Utilities.getItemQuantity(item) || 1), 0);
+				const updateData = Utilities.setItemQuantity({ _id: primary.id }, totalQuantity);
+				itemsToUpdate.push(updateData);
+				for (let i = 1; i < group.length; i++) {
+					itemsToDelete.push(group[i].id);
+				}
+			}
+		}
+
+		if (itemsToUpdate.length || itemsToDelete.length) {
+			if (this.actor.isOwner) {
+				if (itemsToUpdate.length) await this.actor.updateEmbeddedDocuments("Item", itemsToUpdate);
+				if (itemsToDelete.length) await this.actor.deleteEmbeddedDocuments("Item", itemsToDelete);
+			} else {
+				await ItemPileSocket.executeAsGM(ItemPileSocket.HANDLERS.COMMIT_DOCUMENT_CHANGES, Utilities.getUuid(this.actor), {
+					itemsToUpdate,
+					itemsToDelete,
+					itemsToCreate: []
+				});
+			}
+			this.allItems.set([]);
+			this.populateItems();
+			this.refreshItems();
+			Helpers.custom_notify(game.i18n.localize("ITEM-PILES.Notifications.ConsolidateSuccess"));
+		} else {
+			Helpers.custom_notify(game.i18n.localize("ITEM-PILES.Notifications.ConsolidateNoDuplicates"));
+		}
 	}
 
 	async depositCurrency() {

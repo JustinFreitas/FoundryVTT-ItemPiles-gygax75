@@ -1,5 +1,15 @@
 # Item Piles Changelog
 
+## Version 3.3.4-gygax75.2
+
+- Added `Consolidate` button and action to item pile sheet to merge identical item and currency stacks
+- Added discrete row drop option (`Create as new row`) on the drop dialog defaulting to unstacked rows
+- Restored numeric quantity edit boxes on pile sheet rows for unstacked items and currencies
+- Fixed initial document subscription quantity race condition in `PileItem` store
+- Fixed multi-stack currency population in `ItemPileStore`
+- Fixed token document vs actor resolution in `_commitDocumentChanges` on Foundry V14
+- Fixed `foundry.canvas.placeables.Token` namespace deprecation warning on Foundry V14
+
 ## Version 3.3.4-gygax75.1
 
 - Merged upstream updates 3.3.3 and 3.3.4 into the gygax75 release line

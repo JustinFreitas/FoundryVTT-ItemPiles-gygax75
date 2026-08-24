@@ -560,9 +560,11 @@ export class VaultItem extends PileItem {
 
 		let quantity = get(this.quantity);
 		if (quantity > 1) {
-			quantity = await DropItemDialog.show(this.item, this.store.actor, {
+			const result = await DropItemDialog.show(this.item, this.store.actor, {
 				localizationTitle: "WithdrawItem"
 			});
+			if (!result) return;
+			quantity = typeof result === "object" ? result.quantity : result;
 		}
 		return game.itempiles.API.transferItems(this.store.actor, this.store.recipient, [{
 			_id: this.id, quantity
@@ -571,9 +573,11 @@ export class VaultItem extends PileItem {
 
 	async split(x, y, flipped) {
 
-		let quantity = await DropItemDialog.show(this.item, this.store.actor, {
+		const result = await DropItemDialog.show(this.item, this.store.actor, {
 			localizationTitle: "SplitItem", quantityAdjustment: -1
 		});
+		if (!result) return;
+		let quantity = typeof result === "object" ? result.quantity : result;
 
 		await game.itempiles.API.removeItems(this.store.actor, [{
 			_id: this.id, quantity

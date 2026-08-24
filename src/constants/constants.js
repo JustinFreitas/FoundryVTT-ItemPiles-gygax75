@@ -140,7 +140,7 @@ const CONSTANTS = {
 		distance: 1,
 		macro: "",
 		deleteWhenEmpty: "default",
-		canStackItems: "yes",
+		canStackItems: "no",
 		canInspectItems: true,
 		displayItemTypes: false,
 		description: "",

@@ -82,8 +82,10 @@ export class PileItem extends PileBaseItem {
 		this.item = item;
 		this.itemDocument = new TJSDocument(this.item);
 		this.canStack = PileUtilities.canItemStack(this.item, this.actor);
-		this.presentFromTheStart.set(Utilities.getItemQuantity(this.item) > 0 || !this.canStack);
-		this.quantity.set(this.canStack ? Utilities.getItemQuantity(this.item) : 1);
+		this.hasQuantity = Utilities.hasItemQuantity(this.item);
+		const itemQuantity = Utilities.getItemQuantity(this.item);
+		this.presentFromTheStart.set(itemQuantity > 0 || !this.canStack);
+		this.quantity.set(itemQuantity > 0 ? itemQuantity : 1);
 		this.currentQuantity.set(Math.min(get(this.currentQuantity), get(this.quantityLeft), get(this.quantity)));
 		this.id = this.item.id;
 		this.type = this.item.type;
@@ -121,8 +123,12 @@ export class PileItem extends PileBaseItem {
 			this.name.set(itemData?.name ?? this.item.name);
 			this.img.set(itemData?.img ?? this.item.img);
 			this.similarities = Utilities.setSimilarityProperties({}, this.item);
-			if (PileUtilities.canItemStack(this.item, this.store.actor) && Utilities.hasItemQuantity(updateData)) {
+			if (Utilities.hasItemQuantity(updateData)) {
 				this.quantity.set(Utilities.getItemQuantity(updateData));
+				const quantity = Math.min(get(this.currentQuantity), get(this.quantityLeft), get(this.quantity));
+				this.currentQuantity.set(quantity);
+			} else if (Utilities.hasItemQuantity(this.item)) {
+				this.quantity.set(Utilities.getItemQuantity(this.item));
 				const quantity = Math.min(get(this.currentQuantity), get(this.quantityLeft), get(this.quantity));
 				this.currentQuantity.set(quantity);
 			}
