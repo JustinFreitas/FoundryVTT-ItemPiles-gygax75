@@ -1,5 +1,11 @@
 # Item Piles Changelog
 
+## Version 3.3.4-gygax75.3
+
+- Fixed drop flag propagation in `_transferItems` across source and target actor transactions
+- Fixed stacking override in `Transaction.appendItemChanges` to merge into existing rows when `Create as new row` is unchecked
+- Styled item pile sheet footer buttons for single-height rows
+
 ## Version 3.3.4-gygax75.2
 
 - Added `Consolidate` button and action to item pile sheet to merge identical item and currency stacks

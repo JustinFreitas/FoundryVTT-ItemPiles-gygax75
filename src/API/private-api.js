@@ -306,6 +306,17 @@ export default class PrivateAPI {
 
 		const sourceUpdates = sourceTransaction.prepare();
 
+		for (const delta of sourceUpdates.itemDeltas) {
+			const matchingInput = items.find(it => (it?.item?._id ?? it?.item?.id ?? it?.id) === (delta.item._id ?? delta.item.id));
+			const incomingFlags = matchingInput?.item?.flags?.[CONSTANTS.FLAGS.ITEM] ?? matchingInput?.flags?.[CONSTANTS.FLAGS.ITEM];
+			if (incomingFlags) {
+				foundry.utils.setProperty(delta.item, CONSTANTS.FLAGS.ITEM, {
+					...(foundry.utils.getProperty(delta.item, CONSTANTS.FLAGS.ITEM) || {}),
+					...incomingFlags
+				});
+			}
+		}
+
 		const targetTransaction = new Transaction(targetActor);
 		await targetTransaction.appendItemChanges(sourceUpdates.itemDeltas);
 		const targetUpdates = targetTransaction.prepare();

@@ -84,7 +84,15 @@ export default class Transaction {
 				documentExistingItem = documentHasItem || Utilities.findSimilarItem(this.document.items, itemData);
 			}
 
-			const canItemStack = PileUtilities.canItemStack(documentExistingItem || itemData, this.document);
+			const incomingCanStack = foundry.utils.getProperty(itemData, CONSTANTS.FLAGS.ITEM + ".canStack");
+			let canItemStack;
+			if (incomingCanStack === "no") {
+				canItemStack = false;
+			} else if (incomingCanStack === "yes") {
+				canItemStack = true;
+			} else {
+				canItemStack = PileUtilities.canItemStack(documentExistingItem || itemData, this.document);
+			}
 
 			if (remove && (keepIfZero || entryType === "currency")) {
 				this.itemsToNotDelete.add(item.id);
