@@ -1,5 +1,11 @@
 # Item Piles Changelog
 
+## Version 3.3.4-gygax75.4
+
+- Incorporated upstream PR #860: fix client freeze during merchant payment when primary currencies share an equal exchange rate or when buyer runs out of currency
+- Updated npm dependencies (bumped `svelte-dnd-action` to 0.9.80, patched `source-map-js` and `postcss-selector-parser` security advisories)
+- Rebuilt distribution bundle with Vite production optimizations
+
 ## Version 3.3.4-gygax75.3
 
 - Fixed drop flag propagation in `_transferItems` across source and target actor transactions
