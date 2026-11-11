@@ -384,6 +384,22 @@ export function getActorCurrencies(target, {
 	return currencies;
 }
 
+/**
+ * Applies attribute changes to a document.
+ *
+ * @param {Actor|Item} document
+ * @param {Object} changes
+ * @returns {Promise}
+ */
+export async function updateDocumentAttributes(document, changes) {
+	if (!document || foundry.utils.isEmpty(changes)) return;
+	if (SYSTEMS.DATA.ATTRIBUTE_UPDATE_HANDLER) {
+		changes = await SYSTEMS.DATA.ATTRIBUTE_UPDATE_HANDLER(document, foundry.utils.deepClone(changes)) ?? changes;
+		if (foundry.utils.isEmpty(changes)) return;
+	}
+	return document.update(changes);
+}
+
 export function getCurrenciesInItem(targetItem, {
 	forActor = false, currencyList = false, getAll = false, secondary = true
 } = {}) {
@@ -503,7 +519,7 @@ export function getActorRequiredItemProperties(target, pileData = false) {
 
 export function cleanItemFilters(itemFilters) {
 	return itemFilters
-		? foundry.utils.duplicate(itemFilters).map(filter => {
+		? foundry.utils.deepClone(itemFilters).map(filter => {
 			filter.path = filter.path.trim();
 			filter.filters = (Array.isArray(filter.filters)
 				? filter.filters
@@ -586,10 +602,14 @@ export async function checkItemType(targetActor, item, {
 		const newDisallowedType = isItemInvalid(targetActor, item);
 
 		if (newDisallowedType && !hotkeyActionState.forceDropItem) {
-			const force = await Dialog.confirm({
-				title: game.i18n.localize(warningTitle),
+			const force = await foundry.applications.api.DialogV2.confirm({
+				window: { title: game.i18n.localize(warningTitle) },
+				classes: ["ose", "dialog"],
+				position: { width: 400, height: "auto" },
 				content: `<p class="item-piles-dialog">${game.i18n.format(warningContent, { type: newDisallowedType })}</p>`,
-				defaultYes: false
+				yes: { default: false },
+				no: { default: true },
+				rejectClose: false
 			});
 			if (!force) {
 				return false;
@@ -2292,8 +2312,8 @@ export function getNewItemsVaultPosition(item, gridData, { position = null } = {
 		});
 
 		const cellsToCheck = validCells.sort((a, b) => {
-			const distA = (new Ray(a, position)).distance;
-			const distB = (new Ray(b, position)).distance;
+			const distA = Utilities.distance_between(a, position);
+			const distB = Utilities.distance_between(b, position);
 			return distA - distB;
 		});
 

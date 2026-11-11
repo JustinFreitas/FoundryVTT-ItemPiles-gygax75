@@ -517,6 +517,12 @@ class API {
 			}
 		}
 
+		if (data['ATTRIBUTE_UPDATE_HANDLER']) {
+			if (!Helpers.isFunction(data['ATTRIBUTE_UPDATE_HANDLER'])) {
+				throw Helpers.custom_error("addSystemIntegration | data.ATTRIBUTE_UPDATE_HANDLER must be of type function");
+			}
+		}
+
 		if (data['ITEM_PREVIEW_PERMISSION_LEVEL'] !== undefined) {
 			if (typeof data['ITEM_PREVIEW_PERMISSION_LEVEL'] !== "number") {
 				throw Helpers.custom_error("addSystemIntegration | data.ITEM_PREVIEW_PERMISSION_LEVEL must be of type number");

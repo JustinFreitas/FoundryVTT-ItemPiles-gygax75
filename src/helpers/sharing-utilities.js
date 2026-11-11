@@ -101,7 +101,7 @@ export function canItemPileBeSplit(target) {
  */
 export function getItemPileSharingData(target) {
 	const targetActor = Utilities.getActor(target);
-	return foundry.utils.duplicate(foundry.utils.getProperty(targetActor, CONSTANTS.FLAGS.SHARING) ?? {});
+	return foundry.utils.deepClone(foundry.utils.getProperty(targetActor, CONSTANTS.FLAGS.SHARING) ?? {});
 }
 
 /**

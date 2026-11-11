@@ -5,7 +5,7 @@ import * as Utilities from "../helpers/utilities.js";
 import * as PileUtilities from "../helpers/pile-utilities.js";
 import * as SharingUtilities from "../helpers/sharing-utilities.js";
 import * as Helpers from "../helpers/helpers.js";
-import { InterfaceTracker } from "../socket.js";
+import ItemPileSocket, { InterfaceTracker } from "../socket.js";
 import { PileAttribute, PileItem } from "./pile-item.js";
 import DropCurrencyDialog from "../applications/dialogs/drop-currency-dialog/drop-currency-dialog.js";
 import { SYSTEMS } from "../systems.js";
@@ -634,7 +634,7 @@ export default class ItemPileStore {
 
 		const pileSharingData = SharingUtilities.getItemPileSharingData(this.actor);
 
-		await this.actor.update(attributesToUpdate);
+		await PileUtilities.updateDocumentAttributes(this.actor, attributesToUpdate);
 		if (pileSharingData?.currencies) {
 			pileSharingData.currencies = pileSharingData.currencies.map(currency => {
 				if (attributesToUpdate[currency.path] !== undefined) {
@@ -674,26 +674,63 @@ export default class ItemPileStore {
 		const items = Array.from(this.actor.items);
 		if (!items.length) return;
 
-		const groups = new Map();
+		const containerIdsWithChildren = new Set(
+			items.map(it => it.system?.containerId).filter(Boolean)
+		);
+
+		const groups = [];
 		for (const item of items) {
-			const cost = Number(item.system?.cost ?? 0);
-			const weight = Number(item.system?.weight ?? 0);
-			const key = `${item.name}|${item.type}|${cost}|${weight}`;
-			if (!groups.has(key)) groups.set(key, []);
-			groups.get(key).push(item);
+			if (PileUtilities.isItemInvalid(this.actor, item)) continue;
+			if (!Utilities.isItemStackable(item) && !PileUtilities.isItemCurrency(item)) continue;
+			if (item.system?.containerId || containerIdsWithChildren.has(item.id)) continue;
+
+			const itemFlagData = PileUtilities.getItemFlagData(item);
+			if (itemFlagData?.vaultExpander) continue;
+
+			const itemData = item instanceof Item ? item.toObject() : item;
+			if (CONSTANTS.ITEM_FORCED_UNIQUE_KEYS.some(prop => foundry.utils.getProperty(itemData, prop))) continue;
+
+			const cost = Number(Utilities.getItemCost(itemData) ?? itemData.system?.cost ?? 0);
+			const weight = Number(itemData.system?.weight ?? 0);
+			const description = String(itemData.system?.description ?? "").trim();
+
+			const existingGroup = groups.find(group => {
+				return group.cost === cost
+					&& group.weight === weight
+					&& group.description === description
+					&& !Utilities.areItemsDifferent(group.primaryData, itemData);
+			});
+
+			if (existingGroup) {
+				existingGroup.items.push(item);
+			} else {
+				groups.push({
+					primaryData: itemData,
+					cost,
+					weight,
+					description,
+					items: [item]
+				});
+			}
 		}
 
 		const itemsToUpdate = [];
 		const itemsToDelete = [];
 
-		for (const group of groups.values()) {
-			if (group.length > 1) {
-				const primary = group[0];
-				const totalQuantity = group.reduce((sum, item) => sum + (Utilities.getItemQuantity(item) || 1), 0);
+		for (const group of groups) {
+			if (group.items.length > 1) {
+				const primary = group.items[0];
+				const totalQuantity = group.items.reduce((sum, item) => {
+					const qty = Utilities.getItemQuantity(item);
+					return sum + (Number.isFinite(qty) ? qty : 0);
+				}, 0);
 				const updateData = Utilities.setItemQuantity({ _id: primary.id }, totalQuantity);
+				if (foundry.utils.getProperty(primary, CONSTANTS.FLAGS.ITEM + ".canStack") === "no") {
+					foundry.utils.setProperty(updateData, CONSTANTS.FLAGS.ITEM + ".canStack", "default");
+				}
 				itemsToUpdate.push(updateData);
-				for (let i = 1; i < group.length; i++) {
-					itemsToDelete.push(group[i].id);
+				for (let i = 1; i < group.items.length; i++) {
+					itemsToDelete.push(group.items[i].id);
 				}
 			}
 		}

@@ -91,28 +91,31 @@ export default class TradeAPI {
 		const publicTradeId = foundry.utils.randomID();
 
 		// Spawn a cancel dialog
-		const cancelDialog = new Dialog({
-			title: game.i18n.localize("ITEM-PILES.Trade.Title"),
-			content: `<p style="text-align: center">${game.i18n.format("ITEM-PILES.Trade.OngoingRequest.Content", { user_name: game.users.get(userId).name })}</p>`,
-			buttons: {
-				confirm: {
-					icon: '<i class="fas fa-times"></i>',
+		const targetUserName = foundry.utils.escapeHTML(game.users.get(userId)?.name ?? "");
+		const cancelDialog = new foundry.applications.api.DialogV2({
+			window: { title: game.i18n.localize("ITEM-PILES.Trade.Title") },
+			classes: ["ose", "dialog"],
+			position: { top: 50, width: 300, height: "auto" },
+			content: `<p style="text-align: center">${game.i18n.format("ITEM-PILES.Trade.OngoingRequest.Content", { user_name: targetUserName })}</p>`,
+			buttons: [
+				{
+					action: "cancel",
+					icon: "fas fa-times",
 					label: game.i18n.localize("ITEM-PILES.Trade.OngoingRequest.Label"),
 					callback: () => {
 						ItemPileSocket.executeAsUser(ItemPileSocket.HANDLERS.TRADE_REQUEST_CANCELLED, userId, game.user.id, privateTradeId);
 					}
 				}
-			}
-		}, {
-			top: 50, width: 300
-		}).render(true);
+			]
+		});
+		cancelDialog.render({ force: true });
 
 		// Send out the request
 		return ItemPileSocket.executeAsUser(ItemPileSocket.HANDLERS.TRADE_REQUEST_PROMPT, userId, game.user.id, actor.uuid, privateTradeId, publicTradeId, isPrivate)
 			.then(async (data) => {
 
 				if (data === "cancelled") return;
-				cancelDialog.close();
+				if (cancelDialog?.rendered) cancelDialog.close();
 
 				if (data === "same-actor") {
 					return Helpers.custom_warning(game.i18n.localize("ITEM-PILES.Trade.SameActor"), true);

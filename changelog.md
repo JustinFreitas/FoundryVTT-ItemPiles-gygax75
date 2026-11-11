@@ -1,5 +1,16 @@
 # Item Piles Changelog
 
+## Version 3.3.4-gygax75.5
+
+- Fixed critical partial `Take`/removal data loss and currency duplication in `Transaction.appendItemChanges` when `canStackItems` is `"no"` (`itemQuantity > 1`, `keepIfZero`, and currency deductions now decrement quantity instead of force-deleting stacks, and `itemsToNotDelete` resolves `documentExistingItem.id`)
+- Fixed created-item transfer delta quantity reporting in `Transaction.commit` for multi-quantity unstacked rows
+- Fixed Vault drag-and-drop `_depositWithdrawItem` handling `{ quantity, createNewRow }` and cancel responses from `DropItemDialog.show`
+- Hardened `ItemPileStore.consolidate()` to skip invalid/unstackable items (`weapon`, `armor`, `container`), stowed container contents, and items with differing descriptions/similarities, fixed `0`-quantity currency inflation, and fixed missing `ItemPileSocket` import
+- Restored HTML5 form `requestSubmit` validation in `DropItemDialog` and hid the `Create as new row` checkbox on Vault Withdraw/Split and unstackable items
+- Incorporated upstream PR #861 (`ATTRIBUTE_UPDATE_HANDLER` system integration hook and derived `PileAttribute` subscription updates)
+- Migrated legacy V1 `Dialog` / `Dialog.confirm`, `TokenLayer`, and `Ray` calls to Foundry V14 `DialogV2` (with `["ose", "dialog"]` classes and explicit `position`), namespaced canvas classes, `ApplicationV2` sheet header actions, and non-colliding `TokenHUD` controls
+- Reconciled reference `systems/ose.js` (`class,race` filters and OSE coin denominations) and added automated Node regression test suite
+
 ## Version 3.3.4-gygax75.4
 
 - Incorporated upstream PR #860: fix client freeze during merchant payment when primary currencies share an equal exchange rate or when buyer runs out of currency

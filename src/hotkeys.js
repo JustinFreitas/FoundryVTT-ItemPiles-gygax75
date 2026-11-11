@@ -81,7 +81,8 @@ export function registerHotkeysPost() {
 		let clicked = false;
 		window.addEventListener("mousedown", (event) => {
 			if (!canvas.ready) return;
-			if (!(canvas.activeLayer instanceof TokenLayer)) return;
+			const TokenLayerClass = foundry.canvas?.layers?.TokenLayer ?? globalThis.TokenLayer;
+			if (!TokenLayerClass || !(canvas.activeLayer instanceof TokenLayerClass)) return;
 			if (game.activeTool !== "select") return;
 			const hover = document.elementFromPoint(event.clientX, event.clientY);
 			if (!hover || (hover.id !== "board")) return;

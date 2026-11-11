@@ -68,7 +68,7 @@
 	}
 
 	function addPreset(index) {
-		const preset = foundry.utils.duplicate(presetPrices[index]);
+		const preset = foundry.utils.deepClone(presetPrices[index]);
 		preset.id = foundry.utils.randomID();
 		prices = [...prices, preset];
 	}

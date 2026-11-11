@@ -307,7 +307,7 @@ export default class PrivateAPI {
 		const sourceUpdates = sourceTransaction.prepare();
 
 		for (const delta of sourceUpdates.itemDeltas) {
-			const matchingInput = items.find(it => (it?.item?._id ?? it?.item?.id ?? it?.id) === (delta.item._id ?? delta.item.id));
+			const matchingInput = items.find(it => (it?.item?._id ?? it?.item?.id ?? it?._id ?? it?.id) === (delta.item._id ?? delta.item.id));
 			const incomingFlags = matchingInput?.item?.flags?.[CONSTANTS.FLAGS.ITEM] ?? matchingInput?.flags?.[CONSTANTS.FLAGS.ITEM];
 			if (incomingFlags) {
 				foundry.utils.setProperty(delta.item, CONSTANTS.FLAGS.ITEM, {
@@ -1136,9 +1136,7 @@ export default class PrivateAPI {
 		if (targetDocument instanceof TokenDocument || (foundry.canvas?.placeables?.Token && targetDocument instanceof foundry.canvas.placeables.Token)) {
 			targetDocument = targetDocument.actor;
 		}
-		if (!foundry.utils.isEmpty(documentChanges)) {
-			await targetDocument.update(documentChanges);
-		}
+		await PileUtilities.updateDocumentAttributes(targetDocument, documentChanges);
 		const createdItems = itemsToCreate.length
 			? await targetDocument.createEmbeddedDocuments("Item", itemsToCreate, {
 				keepId: true,
@@ -1900,14 +1898,25 @@ export default class PrivateAPI {
 		if (PileUtilities.canItemStack(dropData.itemData.item, vaultActor)) {
 			const itemQuantity = Utilities.getItemQuantity(dropData.itemData.item);
 			if (itemQuantity > 1) {
-				dropData.itemData.quantity = await DropItemDialog.show(item, vaultActor, {
-					localizationTitle: localization
+				const result = await DropItemDialog.show(item, vaultActor, {
+					localizationTitle: localization,
+					allowCreateNewRow: Boolean(!sourceIsVault && targetIsVault)
 				});
+				if (!result) return;
+				if (typeof result === "object" && result !== null) {
+					dropData.itemData.quantity = result.quantity;
+					if (result.createNewRow !== undefined && !sourceIsVault && targetIsVault) {
+						foundry.utils.setProperty(dropData.itemData.item, CONSTANTS.FLAGS.ITEM + ".canStack", result.createNewRow ? "no" : "yes");
+					}
+				} else {
+					dropData.itemData.quantity = result;
+				}
 			} else if (!itemQuantity || itemQuantity <= 0) {
 				Helpers.custom_warning(game.i18n.localize("ITEM-PILES.Errors.ItemNoQuantity"), true);
 				return;
 			}
 		}
+		dropData.itemData.quantity = Utilities.sanitizeNumber(dropData.itemData.quantity);
 		Utilities.setItemQuantity(dropData.itemData.item, dropData.itemData.quantity);
 
 		let flagData = PileUtilities.getItemFlagData(dropData.itemData.item);
@@ -1950,7 +1959,7 @@ export default class PrivateAPI {
 
 				if (sourceToken) {
 
-					const distance = Math.floor(Utilities.distance_between_rect(sourceToken, dropData.target.object) / canvas.grid.size) + 1
+					const distance = Utilities.grids_between_tokens(sourceToken, dropData.target.object);
 
 					const pileData = PileUtilities.getActorFlagData(dropData.target);
 

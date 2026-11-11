@@ -95,7 +95,7 @@ export default class Transaction {
 			}
 
 			if (remove && (keepIfZero || entryType === "currency")) {
-				this.itemsToNotDelete.add(item.id);
+				this.itemsToNotDelete.add(documentExistingItem?.id ?? itemId);
 			}
 
 			if (flags) {
@@ -106,12 +106,12 @@ export default class Transaction {
 
 				const itemQuantity = Utilities.getItemQuantity(documentExistingItem);
 
-				if (canItemStack) {
+				if (canItemStack || (remove && (itemQuantity > 1 || keepIfZero || entryType === "currency"))) {
 
-					const newQuantity = itemQuantity + incomingQuantity;
+					const newQuantity = Math.max(0, itemQuantity + incomingQuantity);
 
 					const existingItemUpdate = remove
-						? this.itemsToUpdate.find(item => item._id === itemId)
+						? this.itemsToUpdate.find(item => item._id === documentExistingItem.id)
 						: Utilities.findSimilarItem(this.itemsToUpdate, itemData);
 
 					if (existingItemUpdate) {
@@ -335,8 +335,9 @@ export default class Transaction {
 
 		return {
 			attributeDeltas: this.attributeDeltas, itemDeltas: this.itemDeltas.concat(itemsCreated.map(item => {
+				const qty = Utilities.getItemQuantity(item);
 				return {
-					item, quantity: PileUtilities.canItemStack(item, this.document) ? Utilities.getItemQuantity(item) : 1
+					item, quantity: (PileUtilities.canItemStack(item, this.document) || qty > 1) ? qty : 1
 				}
 			}))
 		}

@@ -124,11 +124,17 @@ function insertActorHeaderButtons(actorSheet, buttons) {
 
 	if (!game.user.isGM || Helpers.getSetting(SETTINGS.HIDE_ACTOR_HEADER_BUTTON)) return;
 
-	let obj = actorSheet?.object ?? actorSheet?.actor;
+	let obj = actorSheet?.object ?? actorSheet?.actor ?? actorSheet?.document;
+	if (!obj) return;
 
 	const method = () => {
 		ItemPileConfig.show(obj);
 	};
+
+	const action = "item-piles-configure-actor";
+	if (actorSheet?.options?.actions) {
+		actorSheet.options.actions[action] = method;
+	}
 
 	buttons.unshift({
 		label: Helpers.getSetting(SETTINGS.HIDE_ACTOR_HEADER_TEXT)
@@ -136,6 +142,7 @@ function insertActorHeaderButtons(actorSheet, buttons) {
 			: game.i18n.localize("ITEM-PILES.HeaderButtons.Configure"),
 		icon: "fas fa-box-open",
 		class: "item-piles-config-button",
+		action,
 		onClick: method,
 		onclick: method
 	})
@@ -145,25 +152,33 @@ function insertItemHeaderButtons(itemSheet, buttons) {
 
 	if (!game.user.isGM || Helpers.getSetting(SETTINGS.HIDE_ACTOR_HEADER_BUTTON)) return;
 
-	let obj = itemSheet?.object ?? itemSheet?.item;
+	let obj = itemSheet?.object ?? itemSheet?.item ?? itemSheet?.document;
+	if (!obj) return;
 
 	const method = async (event) => {
-		if (game.modules.get("item-linking")?.active && !event.ctrlKey) {
-			const linkedItemUuid = foundry.utils.getProperty(obj, "flags.item-linking.baseItem") ?? false;
+		let targetItem = obj;
+		if (game.modules.get("item-linking")?.active && !event?.ctrlKey) {
+			const linkedItemUuid = foundry.utils.getProperty(targetItem, "flags.item-linking.baseItem") ?? false;
 			if (linkedItemUuid) {
-				obj = await foundry.utils.fromUuid(linkedItemUuid);
-				return ItemEditor.show(obj, {
+				targetItem = await foundry.utils.fromUuid(linkedItemUuid);
+				return ItemEditor.show(targetItem, {
 					extraTitle: " - Compendium"
 				});
 			}
 		}
-		return ItemEditor.show(obj);
+		return ItemEditor.show(targetItem);
 	};
+
+	const action = "item-piles-configure-item";
+	if (itemSheet?.options?.actions) {
+		itemSheet.options.actions[action] = method;
+	}
 
 	buttons.unshift({
 		label: !Helpers.getSetting(SETTINGS.HIDE_ACTOR_HEADER_TEXT) ? game.i18n.localize("ITEM-PILES.HeaderButtons.Configure") : "",
 		icon: "fas fa-box-open",
 		class: "item-piles-config-button",
+		action,
 		onclick: method,
 		onClick: method,
 	})
@@ -186,22 +201,29 @@ function renderPileHUD(app, html) {
 
 	const container = $(`<div class="col right" style="right:-${offset}px;"></div>`);
 
-	const lock_button = $(`<${htmlType} class="control-icon item-piles" data-action="toggleControls" data-fast-tooltip="${game.i18n.localize("ITEM-PILES.HUD.ToggleLocked")}"><i inert class="fa-solid fa-lock${pileData.locked ? "" : "-open"}"></i></${htmlType}>`);
-	lock_button.click(async function () {
-		$(this).find('.fas').toggleClass('fa-lock').toggleClass('fa-lock-open');
+	const lock_button = $(`<${htmlType} type="button" class="control-icon item-piles" data-fast-tooltip="${game.i18n.localize("ITEM-PILES.HUD.ToggleLocked")}"><i inert class="fa-solid fa-lock${pileData.locked ? "" : "-open"}"></i></${htmlType}>`);
+	lock_button.click(async function (event) {
+		event.preventDefault();
+		event.stopPropagation();
+		$(this).find('i').toggleClass('fa-lock').toggleClass('fa-lock-open');
 		await game.itempiles.API.toggleItemPileLocked(document);
 	});
 	container.append(lock_button);
 
-	const open_button = $(`<${htmlType} class="control-icon item-piles" data-action="toggleControls" data-fast-tooltip="${game.i18n.localize("ITEM-PILES.HUD.ToggleClosed")}"><i inert class="fa-solid fa-box${pileData.closed ? "" : "-open"}"></i></${htmlType}>`);
-	open_button.click(async function () {
-		$(this).find('.fas').toggleClass('fa-box').toggleClass('fa-box-open');
+	const open_button = $(`<${htmlType} type="button" class="control-icon item-piles" data-fast-tooltip="${game.i18n.localize("ITEM-PILES.HUD.ToggleClosed")}"><i inert class="fa-solid fa-box${pileData.closed ? "" : "-open"}"></i></${htmlType}>`);
+	open_button.click(async function (event) {
+		event.preventDefault();
+		event.stopPropagation();
+		$(this).find('i').toggleClass('fa-box').toggleClass('fa-box-open');
 		await game.itempiles.API.toggleItemPileClosed(document);
 	});
 	container.append(open_button);
 
-	const configure_button = $(`<${htmlType} class="control-icon item-piles" data-action="close" data-fast-tooltip="${game.i18n.localize("ITEM-PILES.HUD.Configure")}"><i inert class="fa-solid fa-toolbox"></i></${htmlType}>`);
-	configure_button.click(async function () {
+	const configure_button = $(`<${htmlType} type="button" class="control-icon item-piles" data-fast-tooltip="${game.i18n.localize("ITEM-PILES.HUD.Configure")}"><i inert class="fa-solid fa-toolbox"></i></${htmlType}>`);
+	configure_button.click(async function (event) {
+		event.preventDefault();
+		event.stopPropagation();
+		await app.close?.();
 		ItemPileConfig.show(document);
 	});
 	container.append(configure_button);

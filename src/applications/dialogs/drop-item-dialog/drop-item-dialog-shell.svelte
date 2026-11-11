@@ -20,6 +20,9 @@
 	let quantity = itemQuantity > 0 ? itemQuantity : 1;
 	const sliderQuantity = itemQuantity + (application.options?.quantityAdjustment ?? 0);
 	const canItemStack = PileUtilities.canItemStack(item, target);
+	const allowCreateNewRow = Boolean(target)
+		&& (application.options?.allowCreateNewRow ?? !["WithdrawItem", "SplitItem"].includes(application.options?.localizationTitle))
+		&& (Utilities.isItemStackable(item) || PileUtilities.isItemCurrency(item));
 
 	let createNewRow = true;
 
@@ -28,7 +31,14 @@
 	}
 
 	function submit() {
-		application.options.resolve({ quantity: Number(quantity) || 1, createNewRow });
+		const parsed = Math.floor(Number(quantity));
+		const clampedQuantity = unlimitedQuantity
+			? Math.max(1, parsed || 1)
+			: Math.min(Math.max(1, parsed || 1), Math.max(1, sliderQuantity));
+		const payload = allowCreateNewRow
+			? { quantity: clampedQuantity, createNewRow }
+			: { quantity: clampedQuantity };
+		application.options.resolve(payload);
 		application.close();
 	}
 
@@ -79,7 +89,7 @@
 			</div>
 		{/if}
 
-		{#if target}
+		{#if allowCreateNewRow}
 			<div class="form-group" style="margin-top: 0.75rem; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--item-piles-border-color, rgba(0,0,0,0.15)); padding-top: 0.5rem;">
 				<label style="margin: 0; cursor: pointer; flex: 1;" for="create-new-row-toggle">
 					<span style="font-weight: bold;">Create as new row</span>
@@ -91,12 +101,12 @@
 
 		<footer class="sheet-footer item-piles-flexrow" style="margin-top: 1rem;">
 			{#if target}
-				<button type="button" on:click|once={submit}>
+				<button type="button" on:click={requestSubmit}>
 					<i class="fas fa-download"></i>
 					{localize(`ITEM-PILES.Applications.${application.options.localizationTitle}.Submit`)}
 				</button>
 			{:else}
-				<button type="button" on:click|once={submit}>
+				<button type="button" on:click={requestSubmit}>
 					<i class="fas fa-box"></i>
 					{localize(`ITEM-PILES.Applications.${application.options.localizationTitle}.SubmitNoTarget`)}
 				</button>

@@ -52,7 +52,7 @@
 
 		try {
 
-			let defaults = foundry.utils.duplicate(PileUtilities.getPileDefaults());
+			let defaults = foundry.utils.deepClone(PileUtilities.getPileDefaults());
 
 			const types = [
 				"closedImage",

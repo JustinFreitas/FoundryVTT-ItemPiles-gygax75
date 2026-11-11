@@ -191,14 +191,14 @@ export function getItemTypesThatCanStack() {
 		const unstackableItemTypes = Helpers.getSetting(SETTINGS.UNSTACKABLE_ITEM_TYPES);
 		const templates = getDocumentTemplates("Item");
 		const types = new Set(Object.keys(templates));
-		itemTypesWithQuantities = new Set([...itemTypesWithQuantities, ...types.filter(type => {
+		itemTypesWithQuantities = new Set([...itemTypesWithQuantities, ...Array.from(types).filter(type => {
 			let itemTemplate = {
 				system: foundry.utils.deepClone(templates[type])
 			};
 			if (itemTemplate.system?.templates?.length) {
-				const templates = foundry.utils.duplicate(itemTemplate.system.templates);
+				const templates = foundry.utils.deepClone(itemTemplate.system.templates);
 				for (let template of templates) {
-					itemTemplate.system = foundry.utils.mergeObject(itemTemplate.system, foundry.utils.duplicate(game.system.documentTypes.Item.templates[template]));
+					itemTemplate.system = foundry.utils.mergeObject(itemTemplate.system, foundry.utils.deepClone(game.system.documentTypes.Item.templates[template]));
 				}
 			}
 			return hasItemQuantity(itemTemplate);
@@ -349,7 +349,8 @@ export function distance_between_rect(p1, p2) {
 }
 
 export function distance_between(a, b) {
-	return new Ray(a, b).distance;
+	const RayClass = foundry.canvas?.geometry?.Ray ?? globalThis.Ray;
+	return RayClass ? new RayClass(a, b).distance : Math.hypot(b.x - a.x, b.y - a.y);
 }
 
 export function grids_between_tokens(a, b) {
@@ -362,7 +363,11 @@ export function tokens_close_enough(a, b, maxDistance) {
 }
 
 export function refreshAppsWithDocument(doc, callback) {
-	const apps = Object.values(ui.windows).filter(app => app.id.endsWith(doc.id));
+	const allApps = [
+		...Object.values(ui.windows ?? {}),
+		...Array.from(foundry.applications?.instances?.values?.() ?? [])
+	];
+	const apps = allApps.filter(app => app?.id?.endsWith?.(doc.id));
 	for (const app of apps) {
 		if (app[callback]) {
 			app[callback]();
