@@ -14,6 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: 'npm'
+
       # Substitute the Manifest and Download URLs in the module.json.
       # Full releases point the manifest at the latest release asset; pre-releases
       # point it at the live module.json on the next branch, updated after tag.
